@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+
+# Claude
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/build/
+*.tsbuildinfo
+
+# Docker
+docker-compose.override.yml
+
+# Data / caches
+*.npy
+*.npz
+redis-data/
+postgres-data/
