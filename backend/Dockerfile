@@ -20,5 +20,8 @@ COPY src/ ./src/
 # Expose FastAPI port
 EXPOSE 8000
 
-# Run FastAPI with uvicorn
-CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=5 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"
+
+# Run FastAPI with uvicorn (prod mode; dev hot-reload is layered in via docker-compose.dev.yml)
+CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

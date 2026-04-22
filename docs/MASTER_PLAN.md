@@ -6,6 +6,119 @@ CLAUDE.md defines *how to code*. README.md defines *what to build*. This documen
 
 ---
 
+## System architecture at a glance
+
+```mermaid
+graph TD
+    subgraph Frontend["Frontend (React + R3F)"]
+        UI["UI / Camera / Zoom"]
+        Renderers["Per-scale renderers<br/>(atomic → organism)"]
+        Store["Zustand simulation state"]
+    end
+
+    subgraph Backend["Backend (FastAPI)"]
+        REST["REST<br/>setup + queries"]
+        WS["WebSocket<br/>streaming frames"]
+        Multi["Multi-scale coupler"]
+        EngAtom["Atomic engine"]
+        EngMol["Molecular engine"]
+        EngOrg["Organelle engine"]
+        EngCell["Cellular engine"]
+        EngTiss["Tissue engine"]
+        EngOrgan["Organ engine"]
+        EngPBPK["PBPK engine"]
+    end
+
+    subgraph Data["Data"]
+        PG[("PostgreSQL")]
+        Redis[("Redis")]
+        Files[("Parameter files<br/>UFF / MARTINI / SBML / YAML")]
+    end
+
+    UI --> REST
+    Renderers <-->|MessagePack frames| WS
+    Store --> Renderers
+    REST --> Multi
+    WS --> Multi
+    Multi --> EngAtom
+    Multi --> EngMol
+    Multi --> EngOrg
+    Multi --> EngCell
+    Multi --> EngTiss
+    Multi --> EngOrgan
+    Multi --> EngPBPK
+    EngAtom --> PG
+    EngMol --> Files
+    EngCell --> Redis
+    EngPBPK --> Files
+```
+
+## Phase build order (Gantt)
+
+```mermaid
+gantt
+    title Phase build order (relative, not calendar)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+
+    section Foundations
+    Scaffold + Phase-0 hardening  :done, p0, 2026-03-01, 60d
+    Phase 1 — Atomic              :active, p1, after p0, 90d
+    Phase 2 — Molecular           :p2, after p1, 120d
+
+    section Mid-scale
+    Phase 3 — Organelle           :p3, after p2, 120d
+    Phase 4 — Cellular            :p4, after p3, 90d
+    Phase 5 — Tissue              :p5, after p4, 90d
+
+    section Macro-scale
+    Phase 6 — Organ               :p6, after p5, 120d
+    Phase 7 — Whole body (PBPK)   :p7, after p6, 90d
+    Phase 8 — Universal organism  :p8, after p7, 120d
+```
+
+## Module dependency graph
+
+```mermaid
+graph LR
+    constants["constants.py"]
+    data["src/data<br/>(DB + seed scripts)"]
+    models["src/models<br/>(Pydantic schemas)"]
+    api["src/api<br/>(FastAPI routers)"]
+
+    subgraph Sim["src/simulation"]
+        atomic["atomic/"]
+        molecular["molecular/"]
+        organelle["organelle/"]
+        cellular["cellular/"]
+        tissue["tissue/"]
+        organ["organ/"]
+        pbpk["pbpk/"]
+        coupler["coupler/"]
+    end
+
+    constants --> atomic
+    constants --> molecular
+    data --> models
+    models --> api
+    api --> Sim
+    atomic --> molecular
+    molecular --> organelle
+    organelle --> cellular
+    cellular --> tissue
+    tissue --> organ
+    organ --> pbpk
+    coupler -.bridges.-> atomic
+    coupler -.bridges.-> molecular
+    coupler -.bridges.-> organelle
+    coupler -.bridges.-> cellular
+    coupler -.bridges.-> tissue
+    coupler -.bridges.-> organ
+    coupler -.bridges.-> pbpk
+```
+
+---
+
 ## How to Read This Document
 
 Each phase is broken into **stages**. Stages are sequential — do not start Stage N+1 until Stage N is validated. Within each stage, tasks are listed in dependency order. Tasks marked with `[GATE]` are validation checkpoints — the agent must confirm they pass before proceeding.

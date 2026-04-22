@@ -55,6 +55,43 @@ Biochemistry is an ambitious, multi-scale biological simulation platform that mo
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Architecture (Mermaid)
+
+```mermaid
+graph TD
+    subgraph Browser["Browser (Frontend)"]
+        UI["React UI<br/>(controls, HUD, zoom camera)"]
+        R3F["Three.js / R3F<br/>scale renderers"]
+        Store["Zustand stores<br/>(sim state only)"]
+        Worker["Web Worker<br/>MessagePack decode"]
+    end
+
+    subgraph Backend["Backend (Python)"]
+        API["FastAPI<br/>REST + WebSocket"]
+        Engines["Simulation engines<br/>(atomic → molecular → organelle →<br/>cellular → tissue → organ → PBPK)"]
+        Coupler["Multi-scale coupler"]
+        Data["Data layer<br/>(elements, molecules, pathways,<br/>organisms, substances)"]
+    end
+
+    subgraph Infra["Infrastructure"]
+        PG[("PostgreSQL<br/>persistent data")]
+        Redis[("Redis<br/>cache + pub/sub")]
+    end
+
+    UI -->|REST setup + queries| API
+    R3F <-->|WebSocket / MessagePack frames| Worker
+    Worker <-->|binary frames| API
+    Store <--> R3F
+    Store <--> UI
+    API --> Engines
+    Engines --> Coupler
+    Coupler --> Engines
+    API --> Data
+    Data --> PG
+    Engines --> Redis
+    Data --> Redis
+```
+
 ---
 
 ## Technology Stack
@@ -95,6 +132,61 @@ Biochemistry is an ambitious, multi-scale biological simulation platform that mo
 ## Phase Roadmap
 
 This project is divided into 8 major phases. Each phase builds on the previous one. Every phase is independently useful and demonstrable — you do not need to complete all phases to have a working product.
+
+### Phase flow
+
+```mermaid
+flowchart LR
+    P1["Phase 1<br/>Atomic"] --> P2["Phase 2<br/>Molecular"]
+    P2 --> P3["Phase 3<br/>Organelle"]
+    P3 --> P4["Phase 4<br/>Cellular"]
+    P4 --> P5["Phase 5<br/>Tissue"]
+    P5 --> P6["Phase 6<br/>Organ"]
+    P6 --> P7["Phase 7<br/>Whole Body (PBPK)"]
+    P7 --> P8["Phase 8<br/>Universal Organism"]
+
+    P2 -.coarse-grained params.-> P3
+    P3 -.compartment concentrations.-> P4
+    P4 -.cell-type populations.-> P5
+    P5 -.tissue mechanics.-> P6
+    P6 -.organ ODE outputs.-> P7
+```
+
+### Phase timeline (illustrative Gantt — reflects dependency order, not calendar dates)
+
+```mermaid
+gantt
+    title Biochemistry — Phase Build Order
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+
+    section Foundations
+    Phase 0 Scaffold + hardening     :done, p0, 2026-03-01, 60d
+    Phase 1 Atomic simulator         :active, p1, after p0, 90d
+    Phase 2 Molecular simulator      :p2, after p1, 120d
+
+    section Mid-scale
+    Phase 3 Organelle                :p3, after p2, 120d
+    Phase 4 Cellular                 :p4, after p3, 90d
+    Phase 5 Tissue                   :p5, after p4, 90d
+
+    section Macro-scale
+    Phase 6 Organ                    :p6, after p5, 120d
+    Phase 7 Whole body (PBPK)        :p7, after p6, 90d
+    Phase 8 Universal organism       :p8, after p7, 120d
+```
+
+### Scale-crossing contract
+
+```mermaid
+graph LR
+    A["Atomic<br/>(Å, fs)"] -->|force-field params,<br/>bond topology| M["Molecular<br/>(Å, fs)"]
+    M -->|coarse-grained beads,<br/>reaction rates| O["Organelle<br/>(nm, ns)"]
+    O -->|compartment concentrations,<br/>enzyme activity| C["Cellular<br/>(μm, ms)"]
+    C -->|cell populations,<br/>secreted factors| T["Tissue<br/>(mm, s)"]
+    T -->|tissue mechanics,<br/>perfusion| Org["Organ<br/>(cm, s)"]
+    Org -->|blood concentrations,<br/>neural/hormonal signals| Body["PBPK<br/>(whole body, min)"]
+```
 
 ---
 

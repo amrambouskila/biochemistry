@@ -1,5 +1,20 @@
 # CLAUDE.md — AI Assistant Guidelines for Biochemistry
 
+> **MANDATORY WORKFLOW: READ THIS ENTIRE FILE BEFORE EVERY CHANGE.** Every time. No skimming, no assuming prior-session context carries over — it does not.
+>
+> **Why:** This project spans multiple sessions and months of development across 8 phases. Skipping the re-read produces decisions that contradict the architecture, duplicate existing patterns, break cross-scale data contracts, or introduce tech debt that compounds across scales (an unvalidated force field breaks every cellular simulation on top of it).
+>
+> **The workflow, every time:**
+> 1. Read this entire file in full.
+> 2. Read `docs/MASTER_PLAN.md` — the stage-by-stage build order and architectural decisions.
+> 3. Read `docs/status.md` — current state / what was just built / what's next.
+> 4. Read `docs/versions.md` — recent version history.
+> 5. Read `docs/frontend-protocol.md` — canonical R3F disposal/instancing/LOD contract, read before touching any Three.js / R3F component.
+> 6. Read the source files you plan to modify — understand existing patterns first.
+> 7. Then implement, following the rules and contracts defined here.
+
+---
+
 ## Project Identity
 
 **Biochemistry** (Multi-scale Molecular & Anatomical Chemistry Simulator) is a multi-phase project to build a 3D biological simulation platform spanning atoms to organisms. The README.md contains the full roadmap with 8 phases. This file provides guidelines for any AI assistant (Claude or otherwise) helping build this project.
@@ -153,6 +168,7 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 - Types/interfaces: `PascalCase` (prefer `interface` over `type` for object shapes)
 
 **Three.js / React Three Fiber:**
+- **Read `docs/frontend-protocol.md` before writing or modifying any R3F component.** It is the canonical contract for disposal, instancing, state ownership, LOD, and shader organization.
 - Prefer declarative R3F components over imperative Three.js code.
 - Use `useFrame` for per-frame updates, not `requestAnimationFrame`.
 - Use `useMemo` and `useRef` to avoid re-creating Three.js objects on every render.
@@ -199,7 +215,7 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 ### Phase 4: Cellular Simulator
 - Do not attempt to simulate 42 million protein molecules individually. Use a compartmental model where each compartment (cytoplasm, nucleus, mitochondria, ER, etc.) has concentrations of key molecules, and transport between compartments is modeled by rate equations.
 - The Gillespie algorithm for gene expression can be slow for large gene regulatory networks. Use the tau-leaping approximation for efficiency (takes larger timesteps by firing multiple reactions simultaneously when copy numbers are high enough).
-- The cell dashboard is a React UI challenge, not a simulation challenge. Use a charting library (recharts or nivo) for the graphs.
+- The cell dashboard is a React UI challenge, not a simulation challenge. Use Chart.js via `react-chartjs-2` for the graphs (consistent with the preferred 2D charting stack; d3.js only for bespoke visualizations that don't fit standard chart types, WebGL only at >20k datapoints).
 
 ### Phase 5: Tissue Simulator
 - Agent-based modeling (ABM) is inherently serial (each agent's behavior depends on its neighbors), which makes it hard to vectorize. Use NumPy structured arrays and operate on all agents of the same type simultaneously where possible. For example, all fibroblasts secrete collagen at the same rate, so compute all their secretion contributions in one vectorized operation.

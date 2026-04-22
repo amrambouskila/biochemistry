@@ -24,11 +24,19 @@ build/
 .venv/
 venv/
 *.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
 # Node / Frontend
 node_modules/
 frontend/dist/
 frontend/build/
+frontend/coverage/
 *.tsbuildinfo
 
 # Docker

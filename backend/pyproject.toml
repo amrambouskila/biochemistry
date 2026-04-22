@@ -21,6 +21,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
     "ruff>=0.3.0",
     "httpx>=0.27.0",
 ]
@@ -35,3 +36,16 @@ select = ["E", "F", "I", "N", "UP", "ANN"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100 --strict-markers -ra"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

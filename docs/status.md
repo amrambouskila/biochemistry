@@ -1,19 +1,28 @@
 # Status — Biochemistry
 
-## Current Phase: Pre-Phase 1 (Infrastructure)
+## Current Phase: Phase 0 complete — ready for Phase 1, Stage 0.1
 
-The project skeleton is fully scaffolded — backend and frontend directories, Docker setup, CI/CD, launcher scripts, CLAUDE.md, and the master build plan are all in place.
+v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift identified in the re-audit. The scaffold is now production-safe, CI-gated, and fully aligned with docs — the next review pass should read as high-fidelity.
 
 ## What Exists
 
-- **Backend**: `pyproject.toml` configured with uv, FastAPI, NumPy, SciPy, Numba, RDKit, Pydantic v2, SQLAlchemy async, asyncpg, Redis, msgpack. Source structure under `backend/src/` with `api/`, `models/`, `simulation/`, `data/` directories.
-- **Frontend**: React 18 + TypeScript strict + Three.js via R3F + Zustand + Socket.IO. Vite build, pnpm package manager. Source under `frontend/src/`.
-- **Infrastructure**: Docker Compose with backend, frontend, PostgreSQL 16, Redis 7. Healthchecks on all services. Launcher scripts (`run_biochemistry.sh`, `run_biochemistry.bat`).
-- **CI/CD**: `.gitlab-ci.yml` present.
-- **Documentation**: CLAUDE.md (275 lines), README.md (1536 lines with full 8-phase roadmap), `docs/MASTER_PLAN.md` (detailed build order).
+- **Backend**: `pyproject.toml` with uv, FastAPI, NumPy, SciPy, Numba, RDKit, Pydantic v2, SQLAlchemy async, asyncpg, Redis, msgpack, mendeleev. Dev-deps: pytest, pytest-asyncio, pytest-cov, ruff, httpx. Source under `backend/src/` (`api/`, `models/`, `simulation/`, `data/`). `src/constants.py` ships the CODATA-exact universal constants (the ONLY place for numerical literals with physical meaning). Tests: `test_health.py` (FastAPI smoke via `ASGITransport`), `test_constants.py` (CODATA reference validation). Coverage gate wired: `--cov-fail-under=100`, currently 100%.
+- **Backend Dockerfile**: prod-mode CMD (no `--reload`); container-level `HEALTHCHECK` hitting `/health`.
+- **Frontend**: React 18 + TypeScript strict + Three.js via R3F + Zustand + Socket.IO. Vitest + RTL + jsdom + `@vitest/coverage-v8` at 100% thresholds. `tests/setup.ts` wires `cleanup` in `afterEach` (Vitest does not auto-clean). First smoke test (`src/App.test.tsx`). ESLint flat config (`eslint.config.js`) wired for TS + React Hooks + React Refresh.
+- **Infrastructure**: `docker-compose.yml` is prod-clean (backend healthcheck, frontend `depends_on: { backend: { condition: service_healthy } }`). `docker-compose.dev.yml` is the committed dev overlay (bind-mount + `--reload`). Launchers invoke both.
+- **Launchers (`run_biochemistry.sh` / `.bat`)**: full global-CLAUDE §4 contract — `while true` loop, `[r]` restart, `[k]/[q]/[v]` terminal, unrecognized input reprints menu without tearing down containers.
+- **CI/CD**: `.github/workflows/ci.yml` implements global-CLAUDE §5 five-stage pipeline (lint → test → coverage gate → build → docker-build) for both backend (uv + ruff + pytest + uv build + docker) and frontend (pnpm + eslint + vitest --coverage + vite build + docker). Coverage gate is enforced in-tool (`--cov-fail-under=100` / Vitest 100% thresholds) so a passing test job implies a passing gate.
+- **Docs**:
+  - `docs/frontend-protocol.md` — canonical R3F disposal/instancing/LOD contract in-tree.
+  - `README.md` — Mermaid architecture graph, phase-flow flowchart, phase Gantt, scale-crossing contract diagram (seeded per global §3).
+  - `docs/MASTER_PLAN.md` — Mermaid system architecture, phase Gantt, module dependency graph.
+  - `CLAUDE.md` (project) — mandatory re-read block at top, workflow pointing at MASTER_PLAN / status / versions / frontend-protocol. Charting guidance aligned with global §5 (Chart.js, not recharts/nivo).
+
+## Known Gaps (not in v0.2.0 scope)
+
+- `backend/src/` subdirectories (`api/`, `models/`, `simulation/`, `data/`) are intentionally empty — Phase 1 fills them.
+- Project CLAUDE.md is still closer to 300 lines than the "mature 800–2000" target from global §3. That growth is expected as phases ship (each phase adds its own domain rules, pitfalls, and contracts).
 
 ## What's Next
 
-- Begin Phase 1, Stage 0.1: Initialize the Python backend (`pyproject.toml` deps install, database seed script for elements from `mendeleev`).
-- Implement the element database seeder and the atomic orbital voxel grid computation.
-- Get the basic Three.js scene rendering a single sphere before attempting the Bohr model.
+**Phase 1, Stage 0.1**: seed the element database from `mendeleev` into PostgreSQL. Create `backend/src/data/database.py` (async SQLAlchemy engine + session factory), `backend/src/models/element.py` (SQLAlchemy ORM + Pydantic schema), `backend/src/data/seed_elements.py` (one-shot migration), and `backend/src/api/elements.py` (REST router). Matching tests under `backend/tests/`. Stage 0.2: atomic orbital voxel-grid precomputation cached to Redis/`.npy`.

@@ -1,0 +1,18 @@
+# Dev overlay — layered on top of docker-compose.yml by the launcher.
+# Adds source bind-mount + uvicorn --reload so local edits hot-reload without a rebuild.
+# Prod deploys use `docker compose -f docker-compose.yml ...` only (no --reload in the base image).
+
+services:
+  backend:
+    command:
+      - uv
+      - run
+      - uvicorn
+      - src.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+    volumes:
+      - ./backend/src:/app/src
