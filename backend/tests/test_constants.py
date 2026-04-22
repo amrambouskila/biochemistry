@@ -1,4 +1,5 @@
 """Validate physical constants against CODATA-endorsed reference values."""
+
 from __future__ import annotations
 
 import pytest
