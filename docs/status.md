@@ -2,7 +2,7 @@
 
 ## Current Phase: Phase 0 complete — ready for Phase 1, Stage 0.1
 
-v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift identified in the re-audit. The scaffold is now production-safe, CI-gated, and fully aligned with docs — the next review pass should read as high-fidelity.
+v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift identified in the re-audit. The scaffold is now production-safe, CI-gated, and fully aligned with docs — the next review pass should read as high-fidelity. v0.2.1 is a patch that unblocks the CI `frontend / docker-build` stage by pinning pnpm to 9.15.9 (see Versions); CI is green end-to-end again.
 
 ## What Exists
 
@@ -11,7 +11,7 @@ v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift
 - **Frontend**: React 18 + TypeScript strict + Three.js via R3F + Zustand + Socket.IO. Vitest + RTL + jsdom + `@vitest/coverage-v8` at 100% thresholds. `tests/setup.ts` wires `cleanup` in `afterEach` (Vitest does not auto-clean). First smoke test (`src/App.test.tsx`). ESLint flat config (`eslint.config.js`) wired for TS + React Hooks + React Refresh.
 - **Infrastructure**: `docker-compose.yml` is prod-clean (backend healthcheck, frontend `depends_on: { backend: { condition: service_healthy } }`). `docker-compose.dev.yml` is the committed dev overlay (bind-mount + `--reload`). Launchers invoke both.
 - **Launchers (`run_biochemistry.sh` / `.bat`)**: full global-CLAUDE §4 contract — `while true` loop, `[r]` restart, `[k]/[q]/[v]` terminal, unrecognized input reprints menu without tearing down containers.
-- **CI/CD**: `.github/workflows/ci.yml` implements global-CLAUDE §5 five-stage pipeline (lint → test → coverage gate → build → docker-build) for both backend (uv + ruff + pytest + uv build + docker) and frontend (pnpm + eslint + vitest --coverage + vite build + docker). Coverage gate is enforced in-tool (`--cov-fail-under=100` / Vitest 100% thresholds) so a passing test job implies a passing gate.
+- **CI/CD**: `.github/workflows/ci.yml` implements global-CLAUDE §5 five-stage pipeline (lint → test → coverage gate → build → docker-build) for both backend (uv + ruff + pytest + uv build + docker) and frontend (pnpm + eslint + vitest --coverage + vite build + docker). Coverage gate is enforced in-tool (`--cov-fail-under=100` / Vitest 100% thresholds) so a passing test job implies a passing gate. The frontend Docker build pins pnpm via `frontend/package.json`'s `packageManager: pnpm@9.15.9` field (corepack), keeping the image's pnpm in lockstep with the pnpm 9 the non-Docker frontend jobs and the `lockfileVersion: '9.0'` lockfile use.
 - **Docs**:
   - `docs/frontend-protocol.md` — canonical R3F disposal/instancing/LOD contract in-tree.
   - `README.md` — Mermaid architecture graph, phase-flow flowchart, phase Gantt, scale-crossing contract diagram (seeded per global §3).

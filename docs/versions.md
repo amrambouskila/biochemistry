@@ -1,5 +1,13 @@
 # Versions — Biochemistry
 
+## v0.2.1 — Frontend Docker build fix (pnpm pin)
+
+Patch bump (bug fix: the CI `frontend / docker-build` stage was failing).
+
+- **Root cause**: `frontend/Dockerfile` ran `corepack enable && pnpm install` with no pinned pnpm, so corepack fetched pnpm-latest (11.5.2). pnpm 11 `require`s the Node 22 builtin `node:sqlite` and aborts with `ERR_UNKNOWN_BUILTIN_MODULE` on the `node:20-alpine` base image. The non-Docker frontend CI jobs were unaffected because they pin `pnpm/action-setup@v4 → version: 9`.
+- **`frontend/package.json`**: added `"packageManager": "pnpm@9.15.9"` — the canonical corepack pin and single source of truth for the pnpm version used by the Docker build and local dev. 9.15.9 is the latest pnpm 9, matches what CI's `version: 9` resolves to, and is compatible with the committed `lockfileVersion: '9.0'` lockfile and with Node 20.
+- **`frontend/Dockerfile`**: dropped the `2>/dev/null || pnpm install` fallback, which silently defeated `--frozen-lockfile` by regenerating the lockfile on any mismatch. With pnpm now pinned to the lockfile's generator, `--frozen-lockfile` succeeds deterministically and fails loudly on drift — the correct behavior for a build stage.
+
 ## v0.2.0 — Phase-0 hardening + global-CLAUDE alignment
 
 Closes all audit findings and the broader global-CLAUDE drift found in the re-audit. Minor bump (additive: test infra, CI, dev/prod compose split, constants module, committed R3F protocol, Mermaid seeds).
