@@ -19,9 +19,9 @@ print_banner() {
     echo "============================================"
     echo ""
     echo "  Services:"
-    echo "    - PostgreSQL  (port ${POSTGRES_PORT:-5432})"
-    echo "    - Redis       (port ${REDIS_PORT:-6379})"
-    echo "    - Backend     (port ${BACKEND_PORT:-8000})"
+    echo "    - PostgreSQL  (port ${POSTGRES_PORT:-5522})"
+    echo "    - Redis       (port ${REDIS_PORT:-6522})"
+    echo "    - Backend     (port ${BACKEND_PORT:-8222})"
     echo "    - Frontend    (port ${FRONTEND_PORT:-5175})"
     echo ""
 }
@@ -35,8 +35,8 @@ start_services() {
     echo "  Services are running!"
     echo ""
     echo "  Frontend:  http://localhost:${FRONTEND_PORT:-5175}"
-    echo "  Backend:   http://localhost:${BACKEND_PORT:-8000}"
-    echo "  API Docs:  http://localhost:${BACKEND_PORT:-8000}/docs"
+    echo "  Backend:   http://localhost:${BACKEND_PORT:-8222}"
+    echo "  API Docs:  http://localhost:${BACKEND_PORT:-8222}/docs"
     echo "============================================"
 }
 

@@ -1,29 +1,27 @@
 {
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; case \"$f\" in */simulation/*|*/constants.py|*/models/*) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"You just edited a simulation or model file. Verify: (1) type annotations are complete, (2) array dtypes are explicit, (3) no Python for-loops over particles, (4) units are documented, (5) corresponding test exists in tests/. If you changed an engine interface (input/output/timestep/resolution), check that adjacent scale engines still match.\"}}' ;; */types/*|*/stores/*|*/context/*) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"You just edited a type definition or state store. Verify: (1) the TypeScript interface matches the Pydantic model on the backend, (2) no Three.js objects stored in state, (3) Zustand store shape is consistent with simulation data format.\"}}' ;; esac; } || true",
-            "timeout": 5,
-            "statusMessage": "Checking edit context..."
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // .tool_input.filePath // empty' | { read -r f; case \"$(basename \"$f\")\" in .env|.env.*|credentials.json|secrets.*|*.pem|*.key) echo '{\"decision\":\"block\",\"reason\":\"Blocked: writing to sensitive file. Ask the user for confirmation first.\"}'; exit 0 ;; esac; } || true",
-            "timeout": 5,
-            "statusMessage": "Security check..."
+            "command": "node -e \"var p=require('path');require(p.join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'scripts','hooks','pre-tool-use.cjs'))\"",
+            "timeout": 3000
           }
-        ]
+        ],
+        "matcher": "Write|Edit"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"var p=require('path');require(p.join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'scripts','hooks','post-tool-use.cjs'))\"",
+            "timeout": 3000
+          }
+        ],
+        "matcher": "Write|Edit"
       }
     ],
     "Stop": [
@@ -31,8 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/amrambouskila/IMPORTANT/Projects/biochemistry && if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then CHANGED=$(git diff --name-only 2>/dev/null); if [ -n \"$CHANGED\" ]; then echo '{\"systemMessage\":\"Uncommitted changes detected. Consider running /pre-commit before committing.\"}'; fi; fi || true",
-            "timeout": 5
+            "command": "node -e \"var p=require('path');require(p.join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'scripts','hooks','stop.cjs'))\"",
+            "timeout": 5000
           }
         ]
       },
@@ -40,8 +38,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"systemMessage\":\"SESSION END \u2014 MEMORY REVIEW: Before this session closes, review what was learned and suggest memories the user may want to save. Check ~/.codex/memories/-Users-amrambouskila-IMPORTANT-Projects-biochemistry/memory/MEMORY.md first to avoid duplicates \u2014 update existing memories rather than creating new ones when the topic already exists. Memory types: user (role, preferences, knowledge), feedback (corrections given, confirmed approaches \u2014 include WHY), project (decisions with external motivation, deadlines, stakeholder context), reference (pointers to external systems). Worth saving: corrections the user gave you, non-obvious approaches they confirmed, project decisions driven by external factors, pointers to external tools/systems, user preferences learned this session. NOT worth saving: anything derivable from code or git history, debugging solutions, ephemeral task details, things already in AGENTS.md. Present a short bulleted list of suggested memories at the end of your response and let the user decide which to save. Memory dir: ~/.codex/memories/-Users-amrambouskila-IMPORTANT-Projects-biochemistry/memory/\"}'",
-            "timeout": 5
+            "command": "node -e \"var p=require('path');require(p.join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'scripts','hooks','stop-memory.cjs'))\"",
+            "timeout": 5000
           }
         ]
       }

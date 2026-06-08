@@ -178,7 +178,7 @@ This is not a phase — it's the one-time project scaffolding that must exist be
   ```
 
 **Task 0.1.3: Docker infrastructure**
-- What: Create `docker-compose.yml` with services for: PostgreSQL (port 5432), Redis (port 6379), backend (FastAPI on port 8000), frontend (Vite dev server on port 5175)
+- What: Create `docker-compose.yml` with services for: PostgreSQL (port 5522), Redis (port 6522), backend (FastAPI on port 8222), frontend (Vite dev server on port 5175)
 - Where: `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`
 - The backend and frontend containers should hot-reload during development
 - PostgreSQL should have a volume for data persistence
@@ -196,7 +196,7 @@ This is not a phase — it's the one-time project scaffolding that must exist be
 - `docker-compose up` starts all services and they can communicate
 - `pytest` runs (even with zero tests) and exits clean
 - The frontend renders a blank React app at localhost:5175
-- The backend responds to `GET /health` at localhost:8000
+- The backend responds to `GET /health` at localhost:8222
 - PostgreSQL accepts connections and Alembic can run migrations
 - `ruff check backend/src/` passes with no errors
 
@@ -238,7 +238,7 @@ This is not a phase — it's the one-time project scaffolding that must exist be
   - `GET /api/v1/elements/{symbol}/isotopes` — isotopes for an element
 - Response models are the Pydantic models from Task 1.1.1
 - Depends on: Task 1.1.1, Task 1.1.2
-- Validates against: `curl localhost:8000/api/v1/elements/H` returns hydrogen with correct atomic mass (1.008), `curl localhost:8000/api/v1/elements?block=d` returns all transition metals
+- Validates against: `curl localhost:8222/api/v1/elements/H` returns hydrogen with correct atomic mass (1.008), `curl localhost:8222/api/v1/elements?block=d` returns all transition metals
 
 **[GATE 1.1]**: Element data pipeline is complete when:
 - All 118 elements are in the database with correct properties
@@ -658,7 +658,7 @@ This is the most critical code in the entire project. Every subsequent phase dep
 **Task 2.2.7: MD WebSocket streaming**
 - What: Stream simulation frames from backend to frontend in real-time via WebSocket
 - Where: `backend/src/api/simulation.py`
-- WebSocket endpoint: `ws://localhost:8000/ws/simulation`
+- WebSocket endpoint: `ws://localhost:8222/ws/simulation`
 - Use the WSMessage format from CLAUDE.md: `{type: "frame", timestamp: float, payload: bytes}`
 - Payload is MessagePack-encoded: `{positions: Float32Array, energies: {pe, ke, total, temperature}}`
 - Send frames every 100-1000 steps (configurable). At 1fs timestep and sending every 100 steps, that's one frame per 0.1ps — ~100fps if computation can keep up
@@ -903,7 +903,7 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - Endpoints:
   - `POST /api/v1/coarse-grain/from-pdb` — map all-atom structure to CG
   - `POST /api/v1/membrane/generate` — generate a lipid bilayer
-  - `ws://localhost:8000/ws/simulation/cg` — WebSocket streaming for CG-MD frames
+  - `ws://localhost:8222/ws/simulation/cg` — WebSocket streaming for CG-MD frames
 - Depends on: Tasks 3.2.1–3.2.3
 
 **[GATE 3.2]**: CG-MD works when:

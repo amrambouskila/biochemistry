@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<!-- ===========================================================================
+     CANONICAL SHELL for PROJECT_DOCUMENTATION.html
+     Copy this file verbatim into <project>/PROJECT_DOCUMENTATION.html and then:
+       1. Replace every {{PLACEHOLDER}}.
+       2. Replace the SECTIONS placeholder with the project's doc sections
+          (see AUTHORING_GUIDE.md for the component vocabulary).
+     DO NOT change the <head> links, the header markup, the layout scaffold,
+     the #docToc container, or the script tag. Those are shared across all
+     projects so every page looks and behaves identically.
+     Asset paths assume the HTML lives ONE level under the Projects root.
+     =========================================================================== -->
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biochemistry — Project Documentation</title>
+  <style>
+/* ============================================================================
+   doc.css — Shared design system for project documentation pages.
+   One source of truth for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external stylesheet).
+   Do not fork per-project styles. Restyle here to restyle every project at once.
+   ============================================================================ */
+
+/* ---- Theme tokens ------------------------------------------------------- */
+:root {
+  --accent: #4f46e5;
+  --accent-soft: #eef2ff;
+  --accent-border: #c7d2fe;
+  --accent-text: #4338ca;
+
+  --bg: #ffffff;
+  --bg-alt: #f7f8fa;
+  --panel: #ffffff;
+  --panel-alt: #f3f4f6;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #1f2937;
+  --text-soft: #374151;
+  --muted: #6b7280;
+
+  --code-bg: #f6f8fa;
+  --code-text: #1f2937;
+  --code-border: #e5e7eb;
+
+  --fileref-bg: #eef2ff;
+  --fileref-text: #3730a3;
+  --fileref-border: #c7d2fe;
+
+  --note-bg: #eff6ff;   --note-border: #3b82f6;   --note-text: #1e40af;
+  --tip-bg: #ecfdf5;    --tip-border: #10b981;    --tip-text: #065f46;
+  --warn-bg: #fffbeb;   --warn-border: #f59e0b;   --warn-text: #92400e;
+  --key-bg: #faf5ff;    --key-border: #a855f7;    --key-text: #6b21a8;
+  --danger-bg: #fef2f2; --danger-border: #ef4444; --danger-text: #991b1b;
+
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --shadow-lg: 0 10px 30px rgba(16,24,40,.12);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --header-h: 64px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --maxw: 980px;
+}
+
+:root[data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-soft: #1e213a;
+  --accent-border: #3b3f6b;
+  --accent-text: #a5b4fc;
+
+  --bg: #0d1117;
+  --bg-alt: #0a0d12;
+  --panel: #161b22;
+  --panel-alt: #1c2230;
+  --border: #2d333b;
+  --border-strong: #3d444d;
+  --text: #e6edf3;
+  --text-soft: #c9d1d9;
+  --muted: #8b949e;
+
+  --code-bg: #161b22;
+  --code-text: #e6edf3;
+  --code-border: #30363d;
+
+  --fileref-bg: #1e213a;
+  --fileref-text: #c7d2fe;
+  --fileref-border: #3b3f6b;
+
+  --note-bg: #0d2138;   --note-border: #3b82f6;   --note-text: #93c5fd;
+  --tip-bg: #082a1e;    --tip-border: #10b981;    --tip-text: #6ee7b7;
+  --warn-bg: #2b2410;   --warn-border: #f59e0b;   --warn-text: #fcd34d;
+  --key-bg: #221033;    --key-border: #a855f7;    --key-text: #d8b4fe;
+  --danger-bg: #2c1212; --danger-border: #ef4444; --danger-text: #fca5a5;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
+}
+
+/* ---- Base --------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg-alt);
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--text); }
+p { margin: 0 0 1rem; }
+hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* ---- Scroll progress bar ------------------------------------------------ */
+#scrollProgress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), #ec4899);
+  z-index: 1000; transition: width .08s linear;
+}
+
+/* ---- Header ------------------------------------------------------------- */
+.doc-header {
+  position: sticky; top: 0; z-index: 900;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0 1.25rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.doc-header .brand { display: flex; flex-direction: column; min-width: 0; }
+.doc-header .brand .kicker {
+  font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+}
+.doc-header .brand .title {
+  font-size: 1.05rem; font-weight: 700; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 46vw;
+}
+.doc-header .spacer { flex: 1 1 auto; }
+
+.doc-search {
+  position: relative; display: flex; align-items: center;
+}
+.doc-search input {
+  width: 230px; max-width: 36vw;
+  padding: .5rem .75rem .5rem 2rem;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--panel); color: var(--text); font-size: .9rem;
+  outline: none; transition: border-color .15s, box-shadow .15s, width .2s;
+}
+.doc-search input:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); width: 280px;
+}
+.doc-search::before {
+  content: ""; position: absolute; left: .65rem; width: 14px; height: 14px; opacity: .55;
+  background: currentColor;
+  -webkit-mask: var(--icon-search) center/contain no-repeat;
+          mask: var(--icon-search) center/contain no-repeat;
+  color: var(--muted);
+}
+.search-count {
+  position: absolute; right: .6rem; font-size: .72rem; color: var(--muted);
+  pointer-events: none;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .42rem .7rem; font-size: .82rem; font-weight: 600;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--text-soft); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s; white-space: nowrap;
+}
+.btn:hover { background: var(--panel-alt); border-color: var(--accent); color: var(--accent-text); }
+.btn .ico { width: 15px; height: 15px; background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center; }
+.btn-group { display: flex; gap: .4rem; }
+@media (max-width: 760px) { .btn .label { display: none; } .doc-header .title { max-width: 32vw; } }
+
+/* ---- Layout ------------------------------------------------------------- */
+.doc-layout {
+  display: grid; grid-template-columns: 290px minmax(0, 1fr);
+  align-items: start; gap: 0;
+  max-width: 1400px; margin: 0 auto;
+}
+.doc-toc {
+  position: sticky; top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto; padding: 1.25rem .75rem 3rem 1.25rem;
+  border-right: 1px solid var(--border);
+}
+.doc-toc .toc-title {
+  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin: 0 0 .5rem .5rem;
+}
+.doc-toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-toc li { margin: 0; }
+.doc-toc a {
+  display: block; padding: .32rem .5rem; border-radius: 6px;
+  color: var(--text-soft); font-size: .86rem; line-height: 1.4;
+  border-left: 2px solid transparent;
+}
+.doc-toc a:hover { background: var(--panel-alt); text-decoration: none; }
+.doc-toc a.sub { padding-left: 1.4rem; font-size: .8rem; color: var(--muted); }
+.doc-toc a.active {
+  color: var(--accent-text); background: var(--accent-soft);
+  border-left-color: var(--accent); font-weight: 600;
+}
+.doc-toc .toc-num {
+  display: inline-block; min-width: 1.4em; color: var(--muted);
+  font-variant-numeric: tabular-nums; font-weight: 600;
+}
+.doc-toc a.active .toc-num { color: var(--accent); }
+
+.doc-content { padding: 2rem 2.5rem 6rem; min-width: 0; }
+.doc-content-inner { max-width: var(--maxw); margin: 0 auto; }
+@media (max-width: 980px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+  .doc-content { padding: 1.25rem 1rem 4rem; }
+}
+
+/* ---- Hero (page intro) -------------------------------------------------- */
+.doc-hero { margin-bottom: 1.75rem; }
+.doc-hero h1 { font-size: 2.1rem; margin: 0 0 .4rem; letter-spacing: -.02em; }
+.doc-hero .lede { font-size: 1.12rem; color: var(--text-soft); margin: 0 0 1rem; }
+.badge-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .25rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600;
+  background: var(--panel-alt); color: var(--text-soft); border: 1px solid var(--border);
+}
+.badge.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent-border); }
+.badge.green  { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+.badge.amber  { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+.badge.purple { background: var(--key-bg); color: var(--key-text); border-color: var(--key-border); }
+
+.meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .75rem; margin: 1rem 0 0;
+}
+.meta-grid .meta-item {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: .7rem .85rem;
+}
+.meta-grid .meta-k {
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin-bottom: .15rem;
+}
+.meta-grid .meta-v { font-size: .92rem; font-weight: 600; color: var(--text); }
+
+/* ---- Sections (collapsible top level) ----------------------------------- */
+.doc-section { scroll-margin-top: calc(var(--header-h) + 12px); margin-bottom: 1.1rem; }
+.doc-section > details {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.doc-section > details[open] { box-shadow: var(--shadow-lg); }
+.doc-section > details > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem 1.25rem; font-weight: 700;
+}
+.doc-section > details > summary::-webkit-details-marker { display: none; }
+.doc-section > details > summary:hover { background: var(--panel-alt); }
+.doc-section > details > summary h2 {
+  font-size: 1.2rem; margin: 0; font-weight: 700; flex: 1 1 auto;
+}
+.doc-section .sec-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.9rem; height: 1.9rem; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent-text);
+  font-size: .85rem; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.doc-section .chevron {
+  width: 18px; height: 18px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+.doc-section > details[open] > summary .chevron { transform: rotate(90deg); }
+.sec-body { padding: .25rem 1.5rem 1.5rem; border-top: 1px solid var(--border); }
+.sec-body > :first-child { margin-top: 1rem; }
+
+/* sub-collapsibles inside a section (per-component drilldowns) */
+details.sub {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .85rem 0; overflow: hidden;
+}
+details.sub > summary {
+  list-style: none; cursor: pointer; padding: .7rem 1rem; font-weight: 600;
+  display: flex; align-items: center; gap: .55rem; font-size: .96rem;
+}
+details.sub > summary::-webkit-details-marker { display: none; }
+details.sub > summary:hover { background: var(--panel-alt); }
+details.sub > summary::before {
+  content: ""; width: 14px; height: 14px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+details.sub[open] > summary::before { transform: rotate(90deg); }
+details.sub > summary .sub-tag {
+  margin-left: auto; font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border: 1px solid var(--border);
+  padding: .1rem .45rem; border-radius: 6px;
+}
+.sub-body { padding: .25rem 1rem 1rem; }
+.sub-body > :first-child { margin-top: .65rem; }
+
+/* ---- File references ---------------------------------------------------- */
+code.fileref {
+  font-family: var(--mono); font-size: .82em; font-weight: 600;
+  background: var(--fileref-bg); color: var(--fileref-text);
+  border: 1px solid var(--fileref-border); border-radius: 6px;
+  padding: .08em .45em .08em 1.5em; cursor: pointer; position: relative;
+  white-space: nowrap; transition: filter .12s;
+}
+code.fileref::before {
+  content: ""; position: absolute; left: .4em; top: 50%; transform: translateY(-50%);
+  width: .85em; height: .85em; background: currentColor; opacity: .8;
+  -webkit-mask: var(--icon-file) center/contain no-repeat;
+          mask: var(--icon-file) center/contain no-repeat;
+}
+code.fileref:hover { filter: brightness(.96); text-decoration: none; }
+:root[data-theme="dark"] code.fileref:hover { filter: brightness(1.15); }
+code.fileref.copied { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+code.fileref.dir::before { -webkit-mask: var(--icon-folder) center/contain no-repeat; mask: var(--icon-folder) center/contain no-repeat; }
+
+.filecard {
+  display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap;
+  padding: .55rem .7rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .4rem 0;
+}
+.filecard .filecard-desc { color: var(--text-soft); font-size: .92rem; }
+.filelist { display: flex; flex-direction: column; gap: .35rem; margin: .75rem 0; }
+
+/* ---- Inline code & code blocks ------------------------------------------ */
+:not(pre) > code {
+  font-family: var(--mono); font-size: .86em;
+  background: var(--panel-alt); border: 1px solid var(--border);
+  border-radius: 5px; padding: .08em .4em; color: var(--code-text);
+}
+figure.code {
+  margin: 1rem 0; border: 1px solid var(--code-border); border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--code-bg);
+}
+figure.code figcaption {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .85rem; font-family: var(--mono); font-size: .76rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border-bottom: 1px solid var(--code-border);
+}
+figure.code figcaption .lang {
+  margin-left: auto; text-transform: uppercase; letter-spacing: .06em; font-size: .68rem;
+}
+figure.code pre { margin: 0; padding: .9rem 1rem; overflow-x: auto; }
+figure.code code { font-family: var(--mono); font-size: .82rem; line-height: 1.6; color: var(--code-text); background: none; border: none; padding: 0; }
+.code-copy {
+  position: absolute; top: .4rem; right: .4rem; opacity: 0; transition: opacity .15s;
+}
+figure.code { position: relative; }
+figure.code:hover .code-copy { opacity: 1; }
+
+/* ---- Callouts ----------------------------------------------------------- */
+.callout {
+  display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem;
+  padding: .85rem 1rem; border-radius: var(--radius-sm); margin: 1rem 0;
+  border: 1px solid; border-left-width: 4px;
+}
+.callout .callout-title { font-weight: 700; font-size: .9rem; grid-column: 2; }
+.callout .callout-body { grid-column: 2; }
+.callout .callout-body > :last-child { margin-bottom: 0; }
+.callout::before {
+  content: ""; grid-row: 1 / span 2; width: 18px; height: 18px; margin-top: .15rem;
+  background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.callout.note  { background: var(--note-bg); border-color: var(--note-border); color: var(--note-text); }
+.callout.tip   { background: var(--tip-bg);  border-color: var(--tip-border);  color: var(--tip-text); }
+.callout.warn  { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+.callout.key   { background: var(--key-bg);  border-color: var(--key-border);  color: var(--key-text); }
+.callout.danger{ background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+.callout.note::before  { -webkit-mask: var(--icon-info) center/contain no-repeat; mask: var(--icon-info) center/contain no-repeat; }
+.callout.tip::before   { -webkit-mask: var(--icon-bulb) center/contain no-repeat; mask: var(--icon-bulb) center/contain no-repeat; }
+.callout.warn::before  { -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout.key::before   { -webkit-mask: var(--icon-key) center/contain no-repeat; mask: var(--icon-key) center/contain no-repeat; }
+.callout.danger::before{ -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout .callout-body code { background: color-mix(in srgb, currentColor 12%, transparent); border-color: transparent; color: inherit; }
+
+/* ---- Tables ------------------------------------------------------------- */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+table.doc-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.doc-table th, table.doc-table td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.doc-table thead th { background: var(--panel-alt); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); position: sticky; top: 0; }
+table.doc-table tbody tr:last-child td { border-bottom: none; }
+table.doc-table tbody tr:hover { background: var(--bg-alt); }
+table.doc-table code { white-space: nowrap; }
+
+/* ---- Definition lists --------------------------------------------------- */
+dl.doc-dl { margin: 1rem 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: .1rem 1rem; }
+dl.doc-dl dt { font-weight: 700; color: var(--text); padding: .4rem 0; border-top: 1px solid var(--border); }
+dl.doc-dl dd { margin: 0; padding: .4rem 0; color: var(--text-soft); border-top: 1px solid var(--border); }
+dl.doc-dl dt:first-of-type, dl.doc-dl dd:first-of-type { border-top: none; }
+@media (max-width: 620px) { dl.doc-dl { grid-template-columns: 1fr; } dl.doc-dl dd { padding-top: 0; border-top: none; } }
+
+/* ---- Tech-stack cards --------------------------------------------------- */
+.stack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .85rem; margin: 1rem 0; }
+.stack-card {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-alt);
+  padding: .85rem .95rem; display: flex; flex-direction: column; gap: .35rem;
+}
+.stack-card .stack-head { display: flex; align-items: baseline; gap: .5rem; }
+.stack-card .stack-name { font-weight: 700; font-size: 1rem; }
+.stack-card .stack-ver { font-family: var(--mono); font-size: .76rem; color: var(--accent-text); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 5px; padding: .05rem .4rem; }
+.stack-card .stack-why { font-size: .87rem; color: var(--text-soft); }
+.stack-card .stack-foot { margin-top: auto; }
+
+/* ---- Step list ---------------------------------------------------------- */
+ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0; }
+ol.steps > li {
+  position: relative; padding: .15rem 0 .9rem 2.4rem; margin: 0;
+  border-left: 2px solid var(--border); margin-left: .9rem;
+}
+ol.steps > li:last-child { border-left-color: transparent; }
+ol.steps > li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: -.95rem; top: 0;
+  width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---- Pipeline / flow chips ---------------------------------------------- */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: 1rem 0; }
+.flow .node { padding: .35rem .7rem; border: 1px solid var(--accent-border); background: var(--accent-soft); color: var(--accent-text); border-radius: var(--radius-sm); font-weight: 600; font-size: .85rem; }
+.flow .arrow { color: var(--muted); font-weight: 700; }
+
+/* ---- Diagram (mermaid) -------------------------------------------------- */
+figure.diagram { margin: 1.25rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--panel); padding: 1rem; overflow-x: auto; text-align: center; }
+figure.diagram figcaption { margin-top: .6rem; font-size: .82rem; color: var(--muted); text-align: center; }
+figure.diagram .mermaid { display: flex; justify-content: center; }
+.mermaid-fallback { display: none; }
+figure.diagram.failed .mermaid { display: none; }
+figure.diagram.failed .mermaid-fallback { display: block; text-align: left; }
+
+/* ---- Misc --------------------------------------------------------------- */
+.tag-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+.tag { font-size: .76rem; padding: .15rem .5rem; border-radius: 999px; background: var(--panel-alt); border: 1px solid var(--border); color: var(--text-soft); font-family: var(--mono); }
+
+.lead-in { font-size: 1rem; color: var(--text-soft); border-left: 3px solid var(--accent); padding-left: .9rem; margin: 0 0 1.25rem; }
+
+ul.clean { list-style: none; padding-left: 0; }
+ul.clean > li { position: relative; padding-left: 1.4rem; margin: .35rem 0; }
+ul.clean > li::before { content: ""; position: absolute; left: .2rem; top: .55em; width: .4rem; height: .4rem; border-radius: 50%; background: var(--accent); }
+
+.content-section h3 { margin-top: 1.5rem; font-size: 1.05rem; }
+.sec-body h3 { margin-top: 1.6rem; font-size: 1.08rem; padding-bottom: .3rem; border-bottom: 1px solid var(--border); }
+.sec-body h4 { margin-top: 1.2rem; font-size: .96rem; }
+
+mark.hl { background: #fde68a; color: #78350f; border-radius: 3px; padding: 0 .1em; }
+:root[data-theme="dark"] mark.hl { background: #92400e; color: #fde68a; }
+
+.filtered-out { display: none !important; }
+
+/* ---- Back to top -------------------------------------------------------- */
+#backTop {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 800;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong);
+  background: var(--panel); color: var(--text-soft); cursor: pointer; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s, transform .2s;
+}
+#backTop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#backTop:hover { color: var(--accent-text); border-color: var(--accent); }
+#backTop .ico { width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--icon-up) center/contain no-repeat; mask: var(--icon-up) center/contain no-repeat; }
+
+/* ---- Footer ------------------------------------------------------------- */
+.doc-footer {
+  border-top: 1px solid var(--border); margin-top: 2rem; padding: 1.5rem 2.5rem;
+  color: var(--muted); font-size: .84rem; max-width: 1400px; margin-left: auto; margin-right: auto;
+}
+.doc-footer code { font-size: .8em; }
+
+/* ---- Icons (data-URI masks; monochrome, themeable via currentColor) ----- */
+:root {
+  --icon-search: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>');
+  --icon-chevron: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>');
+  --icon-file: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
+  --icon-folder: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>');
+  --icon-info: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>');
+  --icon-bulb: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M15.09 14c.18-.79.62-1.42 1.27-2A4.5 4.5 0 1 0 7.64 12c.65.58 1.09 1.21 1.27 2"/></svg>');
+  --icon-warn: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>');
+  --icon-key: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>');
+  --icon-up: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>');
+  --icon-expand: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>');
+  --icon-collapse: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 20 5-5 5 5M7 4l5 5 5-5"/></svg>');
+  --icon-sun: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>');
+  --icon-moon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>');
+  --icon-print: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>');
+  --icon-copy: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>');
+}
+
+/* ---- Print -------------------------------------------------------------- */
+@media print {
+  .doc-header, .doc-toc, #backTop, #scrollProgress, .code-copy { display: none !important; }
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-content { padding: 0; }
+  .doc-section > details { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  body { background: #fff; }
+  a { color: inherit; }
+}
+
+/* ---- Index hub (DOCUMENTATION_INDEX.html) ------------------------------- */
+.index-wrap { max-width: 1180px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+.index-hero { margin-bottom: 2rem; }
+.index-hero h1 { font-size: 2.3rem; margin: 0 0 .5rem; letter-spacing: -.02em; }
+.index-hero .lede { font-size: 1.15rem; color: var(--text-soft); margin: 0; max-width: 70ch; }
+.index-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.index-stats .stat { display: flex; flex-direction: column; }
+.index-stats .stat .num { font-size: 1.7rem; font-weight: 800; color: var(--accent-text); line-height: 1; }
+.index-stats .stat .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin-top: .3rem; }
+.index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1rem; margin: 1.75rem 0 0; }
+a.index-card { text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: .55rem; box-shadow: var(--shadow); transition: transform .12s, box-shadow .12s, border-color .12s; }
+a.index-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent); text-decoration: none; }
+a.index-card .ic-title { font-size: 1.12rem; font-weight: 700; color: var(--text); font-family: var(--mono); }
+a.index-card .ic-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; flex: 1 1 auto; }
+a.index-card .ic-badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+a.index-card .ic-open { margin-top: .35rem; font-size: .8rem; font-weight: 700; color: var(--accent-text); display: inline-flex; align-items: center; gap: .3rem; }
+a.index-card .ic-open::after { content: "→"; transition: transform .12s; }
+a.index-card:hover .ic-open::after { transform: translateX(3px); }
+@media (max-width: 560px) { .index-wrap { padding: 1.5rem 1rem 3rem; } .index-grid { grid-template-columns: 1fr; } }
+
+  </style>
+</head>
+<body>
+  <div id="scrollProgress"></div>
+
+  <header class="doc-header">
+    <div class="brand">
+      <span class="kicker">Project Guide</span>
+      <span class="title">Biochemistry</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="doc-search">
+      <input id="docSearch" type="search" placeholder="Search this guide…" aria-label="Search documentation">
+      <span class="search-count"></span>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="expandAll" title="Expand all sections"><span class="ico" style="-webkit-mask:var(--icon-expand) center/contain no-repeat;mask:var(--icon-expand) center/contain no-repeat"></span><span class="label">Expand</span></button>
+      <button class="btn" id="collapseAll" title="Collapse all sections"><span class="ico" style="-webkit-mask:var(--icon-collapse) center/contain no-repeat;mask:var(--icon-collapse) center/contain no-repeat"></span><span class="label">Collapse</span></button>
+      <button class="btn" id="themeToggle" title="Toggle light / dark"><span class="ico"></span></button>
+      <button class="btn" id="printBtn" title="Print / Save as PDF"><span class="ico" style="-webkit-mask:var(--icon-print) center/contain no-repeat;mask:var(--icon-print) center/contain no-repeat"></span></button>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+    <nav class="doc-toc" id="docToc"><div class="toc-title">Contents</div></nav>
+
+    <main class="doc-content">
+      <div class="doc-content-inner">
+
+        <section class="doc-hero">
+          <h1>Biochemistry</h1>
+          <p class="lede">A multi-scale 3D biological simulator that models reality from individual atoms up to complete living organisms — currently a hardened Phase-0 scaffold with the full simulation stack still ahead.</p>
+          <div class="badge-row">
+            <span class="badge accent">Full-stack</span>
+            <span class="badge green">Phase 0 complete · Phase 1 next</span>
+            <span class="badge purple">FastAPI + React/R3F</span>
+            <span class="badge">v0.2.0</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item"><div class="meta-k">Stack</div><div class="meta-v">Python 3.11 · React 18 · TS strict · Three.js</div></div>
+            <div class="meta-item"><div class="meta-k">Persistence</div><div class="meta-v">PostgreSQL 16 · Redis 7 (declared, unused yet)</div></div>
+            <div class="meta-item"><div class="meta-k">Entry point</div><div class="meta-v">run_biochemistry.sh / .bat</div></div>
+            <div class="meta-item"><div class="meta-k">Status</div><div class="meta-v">Scaffold only — engines not built</div></div>
+            <div class="meta-item"><div class="meta-k">Phases planned</div><div class="meta-v">8 (atomic → organism)</div></div>
+            <div class="meta-item"><div class="meta-k">CI</div><div class="meta-v">GitHub Actions · 100% coverage gate</div></div>
+          </div>
+        </section>
+
+        <section class="doc-section" id="overview">
+          <details open>
+            <summary><span class="sec-num">1</span><h2>Overview — what this is &amp; why</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Biochemistry is an ambitious multi-scale biological simulation platform. The grand goal: introduce any substance into a virtual organism and watch — in real-time 3D — how it propagates through the body and affects biology at every level, from individual atoms to whole organs.</p>
+
+              <p>The project models reality across eight scales of organization: atomic, molecular, organelle, cellular, tissue, organ, whole body, and universal organism. Each scale is a self-contained simulation engine with a defined input, output, timestep, and spatial resolution, and the scales connect through explicit "scale-crossing" contracts so a cellular engine can consume the concentrations produced by an organelle engine without knowing how that engine works internally.</p>
+
+              <p>The <strong>defining use case</strong> (from <code class="fileref" data-path="README.md">README.md</code>): a user selects "cigarette smoke" and watches carbon monoxide travel through virtual lungs, cross alveolar membranes, and bind hemoglobin while benzene is absorbed, transported to the liver, and metabolized by cytochrome P450 into reactive intermediates that form DNA adducts — all visualized seamlessly from the macro scale of organs down to the nano scale of individual molecular interactions.</p>
+
+              <div class="callout warn">
+                <div class="callout-title">Watch out — what actually exists today</div>
+                <div class="callout-body">This is the single most important thing to internalize before reading the rest. The README, <code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code>, and <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> describe an enormous 8-phase vision, but the repository is currently a <strong>Phase-0 scaffold only</strong> (version <code>0.2.0</code>). The backend exposes exactly one route (<code>GET /health</code>) and one module of physical constants. The frontend renders a single placeholder heading. <strong>None</strong> of the simulation engines, the element database, the periodic table UI, the molecular dynamics code, or the renderers exist yet — those are all planned work described in the master plan. Everywhere this guide describes an engine or endpoint that is not yet built, it is flagged as <em>planned</em>.</div>
+              </div>
+
+              <p>What <em>is</em> built and production-grade is the <strong>foundation</strong>: a correctly wired FastAPI backend with a 100%-coverage test gate, a React 18 + TypeScript-strict + React-Three-Fiber frontend with Vitest at 100% thresholds, a clean Docker Compose topology (Postgres, Redis, backend, frontend) with healthchecks, a dev/prod compose split, full launcher scripts implementing the standard <code>[r]/[k]/[q]/[v]</code> loop, a five-stage GitHub Actions CI pipeline, a manual semver release workflow, and a complete agent-tooling layer (hooks, skills, slash commands) that enforces the architecture rules on every edit.</p>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept — multi-scale from day one</div>
+                <div class="callout-body">The central design constraint, repeated throughout <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code>: every decision is evaluated through "<em>will this still work when we scale up to the next phase?</em>" A molecule renderer that can't handle 10,000 atoms is useless by Phase 3; a cell model that needs 10 minutes per simulated second is useless by Phase 5. Performance and scalability are core requirements from the first line of code, not afterthoughts.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="status">
+          <details>
+            <summary><span class="sec-num">2</span><h2>Status &amp; at-a-glance</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Phase 0 (project hardening) is complete at v0.2.0. The scaffold is CI-gated, docs-aligned, and ready for Phase 1 (the atomic simulator) to begin filling in the empty backend subpackages.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Dimension</th><th>State today</th><th>Source</th></tr></thead>
+                <tbody>
+                  <tr><td>Current phase</td><td>Phase 0 complete — ready for Phase 1, Stage 0.1 (element DB seeding)</td><td><code class="fileref" data-path="docs/status.md">docs/status.md</code></td></tr>
+                  <tr><td>Backend source-of-truth version</td><td><code>0.2.0</code></td><td><code class="fileref" data-path="backend/pyproject.toml:3">backend/pyproject.toml:3</code></td></tr>
+                  <tr><td>Backend API surface</td><td>One route: <code>GET /health</code></td><td><code class="fileref" data-path="backend/src/main.py:14">backend/src/main.py:14</code></td></tr>
+                  <tr><td>Backend domain logic</td><td>Universal physical constants only</td><td><code class="fileref" data-path="backend/src/constants.py">backend/src/constants.py</code></td></tr>
+                  <tr><td>Frontend</td><td>Placeholder heading, dark background</td><td><code class="fileref" data-path="frontend/src/App.tsx">frontend/src/App.tsx</code></td></tr>
+                  <tr><td>Tests</td><td>2 backend (health, constants), 1 frontend (App smoke); coverage 100%</td><td><code class="fileref dir" data-path="backend/tests/">backend/tests/</code></td></tr>
+                  <tr><td>Database / Redis usage</td><td>Containers declared but no code connects to them yet</td><td><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code></td></tr>
+                  <tr><td>CI</td><td>5-stage pipeline, green for the scaffold</td><td><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code></td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">What works today vs. what is planned</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Works today</th><th>Planned (not built)</th></tr></thead>
+                <tbody>
+                  <tr><td>FastAPI app boots, <code>/health</code> returns <code>{"status":"ok"}</code></td><td>Element / molecule / atom / simulation REST routers</td></tr>
+                  <tr><td>CODATA-exact constants module + test</td><td>Quantum, orbital, spectra, ionization engines (Phase 1)</td></tr>
+                  <tr><td>React app renders &amp; passes a smoke test</td><td>Periodic table, 3D viewport, Bohr/cloud/space-filling renderers</td></tr>
+                  <tr><td>Docker Compose stack (4 services) comes up clean</td><td>Force-field / MD engine, WebSocket frame streaming (Phase 2)</td></tr>
+                  <tr><td>Launchers, CI, release workflow, agent hooks</td><td>Multi-scale coupler &amp; engines for organelle → organism (Phases 3–8)</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout note">
+                <div class="callout-title">Version drift to be aware of</div>
+                <div class="callout-body">The semver source-of-truth (<code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code>) is <code>0.2.0</code>, but two other places still read <code>0.1.0</code>: the FastAPI <code>version=</code> in <code class="fileref" data-path="backend/src/main.py:10">backend/src/main.py:10</code> and the frontend <code class="fileref" data-path="frontend/package.json:3">frontend/package.json:3</code>. The release workflow only bumps <code>pyproject.toml</code>, so these are expected to lag until they're wired to the source-of-truth. Worth noting if you spot-check versions across files.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="tech-stack">
+          <details>
+            <summary><span class="sec-num">3</span><h2>Tech stack</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Every choice here is locked by <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> as non-negotiable. The dependencies below are the ones actually pinned in the manifests today; libraries the roadmap calls for but hasn't installed yet (RDKit, SciPy usage, OpenMM, Celery, CuPy) are noted as such.</p>
+
+              <h3 class="anchor">Backend</h3>
+              <div class="stack-grid">
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Python</span><span class="stack-ver">&ge;3.11</span></div>
+                  <div class="stack-why">Backend language. Every module opens with <code>from __future__ import annotations</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:5">backend/pyproject.toml:5</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">FastAPI</span><span class="stack-ver">&ge;0.110</span></div>
+                  <div class="stack-why">Async HTTP + WebSocket server. Auto-generates OpenAPI docs at <code>/docs</code>. Pairs with Pydantic v2.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:7">backend/pyproject.toml:7</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">uvicorn[standard]</span><span class="stack-ver">&ge;0.29</span></div>
+                  <div class="stack-why">ASGI server. Runs the app; <code>--reload</code> added only via the dev compose overlay.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:8">backend/pyproject.toml:8</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">NumPy</span><span class="stack-ver">&ge;1.26</span></div>
+                  <div class="stack-why">All numerical computation. Planned for vectorized force/position arrays. Not yet used.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:9">backend/pyproject.toml:9</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">SciPy</span><span class="stack-ver">&ge;1.12</span></div>
+                  <div class="stack-why">ODE/PDE solvers, <code>cKDTree</code> for neighbor searches, spatial algorithms. Installed; not yet used.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:10">backend/pyproject.toml:10</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Numba</span><span class="stack-ver">&ge;0.59</span></div>
+                  <div class="stack-why"><code>@jit(nopython=True)</code> JIT for hot simulation loops that can't be vectorized.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:11">backend/pyproject.toml:11</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Pydantic</span><span class="stack-ver">&ge;2.6</span></div>
+                  <div class="stack-why">All data models and API schemas. The cross-boundary contract layer with the TS frontend.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:12">backend/pyproject.toml:12</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">SQLAlchemy[asyncio]</span><span class="stack-ver">&ge;2.0</span></div>
+                  <div class="stack-why">Async ORM (with asyncpg) for the element/molecule/substance databases. Installed; no models yet.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:13">backend/pyproject.toml:13</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">asyncpg</span><span class="stack-ver">&ge;0.29</span></div>
+                  <div class="stack-why">Async Postgres driver under SQLAlchemy. Driver string: <code>postgresql+asyncpg://</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:14">backend/pyproject.toml:14</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">redis</span><span class="stack-ver">&ge;5.0</span></div>
+                  <div class="stack-why">Caching + pub/sub, and planned cache for precomputed orbital voxel grids.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:15">backend/pyproject.toml:15</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">msgpack</span><span class="stack-ver">&ge;1.0</span></div>
+                  <div class="stack-why">Binary serialization for large numerical payloads (position/concentration arrays) over WebSocket.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:16">backend/pyproject.toml:16</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">mendeleev</span><span class="stack-ver">&ge;0.15</span></div>
+                  <div class="stack-why">Source for seeding the 118-element periodic-table database in Phase 1, Stage 1.1.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:17">backend/pyproject.toml:17</code></div>
+                </div>
+              </div>
+
+              <h3 class="anchor">Backend dev dependencies</h3>
+              <div class="stack-grid">
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">pytest + asyncio + cov</span><span class="stack-ver">&ge;8.0</span></div>
+                  <div class="stack-why"><code>asyncio_mode = "auto"</code>; coverage gate <code>--cov-fail-under=100</code> in addopts.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:22">backend/pyproject.toml:22</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">ruff</span><span class="stack-ver">&ge;0.3</span></div>
+                  <div class="stack-why">Lint + format. Rules <code>E, F, I, N, UP, ANN</code>; line length 120.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/pyproject.toml:29">backend/pyproject.toml:29</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">httpx</span><span class="stack-ver">&ge;0.27</span></div>
+                  <div class="stack-why">Async test client via <code>ASGITransport</code> — no live server, no network.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/tests/conftest.py">backend/tests/conftest.py</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">uv</span><span class="stack-ver">latest</span></div>
+                  <div class="stack-why">Package manager. <code>uv sync</code> installs; <code>uv build</code> in CI; <code>uv version --bump</code> in release.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="backend/uv.lock">backend/uv.lock</code></div>
+                </div>
+              </div>
+
+              <h3 class="anchor">Frontend</h3>
+              <div class="stack-grid">
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">React</span><span class="stack-ver">^18.3</span></div>
+                  <div class="stack-why">UI framework. TypeScript strict mode enforced via tsconfig.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:18">frontend/package.json:18</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Three.js</span><span class="stack-ver">^0.164</span></div>
+                  <div class="stack-why">WebGL 3D engine. Governed by the disposal/instancing/LOD protocol.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:21">frontend/package.json:21</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">@react-three/fiber</span><span class="stack-ver">^8.16</span></div>
+                  <div class="stack-why">Declarative React renderer for Three.js. <code>useFrame</code> drives per-frame updates.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:17">frontend/package.json:17</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">@react-three/drei</span><span class="stack-ver">^9.105</span></div>
+                  <div class="stack-why">R3F helpers — OrbitControls, cameras, LOD, shader utilities.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:16">frontend/package.json:16</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Zustand</span><span class="stack-ver">^4.5</span></div>
+                  <div class="stack-why">Simulation state (positions, concentrations, vitals). Never holds Three.js objects.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:22">frontend/package.json:22</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">socket.io-client</span><span class="stack-ver">^4.7</span></div>
+                  <div class="stack-why">WebSocket transport for real-time MessagePack simulation frames.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/package.json:20">frontend/package.json:20</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Vite</span><span class="stack-ver">^5.2</span></div>
+                  <div class="stack-why">Dev server (port 5175) + production build. <code>vitest/config</code> shares the config.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/vite.config.ts">frontend/vite.config.ts</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Vitest + RTL + jsdom</span><span class="stack-ver">^1.6</span></div>
+                  <div class="stack-why">Test runner with 100% coverage thresholds; <code>cleanup()</code> wired in <code>afterEach</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/tests/setup.ts">frontend/tests/setup.ts</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">ESLint (flat)</span><span class="stack-ver">^9.0</span></div>
+                  <div class="stack-why">TS + React Hooks + React Refresh rules via the flat config.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/eslint.config.js">frontend/eslint.config.js</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">pnpm</span><span class="stack-ver">9</span></div>
+                  <div class="stack-why">Package manager. <code>pnpm install --frozen-lockfile</code> in CI and Docker build.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="frontend/pnpm-lock.yaml">frontend/pnpm-lock.yaml</code></div>
+                </div>
+              </div>
+
+              <div class="callout note">
+                <div class="callout-title">README stack table vs. installed reality</div>
+                <div class="callout-body">The stack table in <code class="fileref" data-path="README.md">README.md</code> lists CuPy, OpenMM, RDKit, and Celery as backend technologies. Of these, only <strong>RDKit</strong> is named in <code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code> as a Phase-2 dependency, and <em>none</em> of the four are in <code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code> yet. They get added when their phase begins. The constants module is deliberately the only place numeric literals with physical meaning may live.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="architecture">
+          <details>
+            <summary><span class="sec-num">4</span><h2>Architecture</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">The design splits cleanly into "backend computes, frontend renders." The backend must be fully usable headless (via API + scripts); the frontend must be able to render pre-computed data without a live backend. REST handles setup and queries; WebSocket streams binary simulation frames.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+graph TD
+    subgraph Browser["Browser (Frontend)"]
+        UI["React UI<br/>controls, HUD, zoom camera"]
+        R3F["Three.js / R3F<br/>scale renderers"]
+        Store["Zustand stores<br/>sim state only"]
+        Worker["Web Worker<br/>MessagePack decode"]
+    end
+    subgraph Backend["Backend (FastAPI)"]
+        API["REST + WebSocket"]
+        Engines["Simulation engines<br/>atomic to PBPK"]
+        Coupler["Multi-scale coupler"]
+        Data["Data layer"]
+    end
+    subgraph Infra["Infrastructure"]
+        PG[("PostgreSQL")]
+        Redis[("Redis")]
+    end
+    UI -->|REST setup + queries| API
+    R3F <-->|WS / MessagePack| Worker
+    Worker <-->|binary frames| API
+    Store <--> R3F
+    Store <--> UI
+    API --> Engines
+    Engines --> Coupler
+    Coupler --> Engines
+    API --> Data
+    Data --> PG
+    Engines --> Redis
+    Data --> Redis
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph TD
+    subgraph Browser["Browser (Frontend)"]
+        UI["React UI"]
+        R3F["Three.js / R3F"]
+        Store["Zustand stores"]
+        Worker["Web Worker decode"]
+    end
+    subgraph Backend["Backend (FastAPI)"]
+        API["REST + WebSocket"]
+        Engines["Simulation engines"]
+        Coupler["Multi-scale coupler"]
+        Data["Data layer"]
+    end
+    subgraph Infra["Infrastructure"]
+        PG[("PostgreSQL")]
+        Redis[("Redis")]
+    end
+    UI --> API
+    R3F <--> Worker
+    Worker <--> API
+    Store <--> R3F
+    API --> Engines
+    Engines --> Coupler
+    API --> Data
+    Data --> PG
+    Engines --> Redis</code></pre></figure></div>
+                <figcaption>Target service topology (from README + MASTER_PLAN). Today only the REST box and the React UI box are partially implemented.</figcaption>
+              </figure>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept — the four-property engine contract</div>
+                <div class="callout-body">Architecture Principle #1 in <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code>: every simulation engine must declare its <strong>input</strong> (state from the scale below), <strong>output</strong> (state to the scale above / visualization data), <strong>timestep</strong> (simulated time per step), and <strong>spatial resolution</strong> (smallest resolvable feature). Engines at different scales never reach into each other — they talk only through these four properties. This is enforced by the <code>engine-protocol</code> and <code>scale-interface</code> agent skills.</div>
+              </div>
+
+              <h3 class="anchor">The scale chain</h3>
+              <p>The system's spine is the chain of scales, each with its own canonical unit system. Data converts units explicitly at every boundary (never mid-calculation):</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+graph LR
+    A["Atomic<br/>1A, 1fs"] -->|force-field params,<br/>bond topology| M["Molecular<br/>1A, 1fs"]
+    M -->|coarse-grained beads,<br/>reaction rates| O["Organelle<br/>nm, ns to us"]
+    O -->|compartment<br/>concentrations| C["Cellular<br/>100nm, ms"]
+    C -->|cell populations,<br/>secreted factors| T["Tissue<br/>10um, s"]
+    T -->|tissue mechanics,<br/>perfusion| Org["Organ<br/>mm, s"]
+    Org -->|blood concentrations,<br/>hormonal signals| Body["PBPK<br/>whole body, min"]
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph LR
+    A["Atomic 1A 1fs"] --> M["Molecular 1A 1fs"]
+    M --> O["Organelle nm ns"]
+    O --> C["Cellular 100nm ms"]
+    C --> T["Tissue 10um s"]
+    T --> Org["Organ mm s"]
+    Org --> Body["PBPK whole body min"]</code></pre></figure></div>
+                <figcaption>Scale-crossing contract. Each arrow is a typed handoff; the unit system changes at every node.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Process boundaries &amp; data flow</h3>
+              <div class="flow"><span class="node">Browser REST</span><span class="arrow">→</span><span class="node">FastAPI setup</span><span class="arrow">→</span><span class="node">Engine init</span><span class="arrow">→</span><span class="node">WS frames</span><span class="arrow">→</span><span class="node">Worker decode</span><span class="arrow">→</span><span class="node">Zustand</span><span class="arrow">→</span><span class="node">R3F render</span></div>
+
+              <p>Three running processes in production (per <code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code>): the FastAPI backend container, the nginx-served frontend container, and the two data containers (Postgres, Redis). In production the frontend is static files served by nginx, which reverse-proxies <code>/api/</code> and <code>/ws/</code> to the backend (see <code class="fileref" data-path="frontend/nginx.conf">frontend/nginx.conf</code>). In dev, Vite serves the frontend with hot reload and the backend runs with <code>--reload</code>.</p>
+
+              <div class="callout note">
+                <div class="callout-title">Today's reality</div>
+                <div class="callout-body">The "Engine init", "WS frames", "Worker decode", and "R3F render" stages above are all planned. Right now the data flow is: browser loads a static React page that renders one heading; the only working backend interaction is a <code>/health</code> probe used by the Docker healthcheck. The architecture is faithfully scaffolded so these stages can be filled in phase by phase.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="structure">
+          <details>
+            <summary><span class="sec-num">5</span><h2>Directory structure</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">An annotated map of what exists on disk today. Note the absence of <code>backend/src/api/</code>, <code>models/</code>, <code>simulation/</code>, and <code>data/</code> — the master plan references them, but Phase 1 creates them.</p>
+
+              <h3 class="anchor">Repository root</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code><span class="filecard-desc">AI/dev guidelines: stack, architecture principles, per-phase notes, pitfalls, definition-of-done.</span></div>
+                <div class="filecard"><code class="fileref" data-path="AGENTS.md">AGENTS.md</code><span class="filecard-desc">Byte-identical mirror of CLAUDE.md for non-Claude agents (Codex). Same 21 KB content.</span></div>
+                <div class="filecard"><code class="fileref" data-path="README.md">README.md</code><span class="filecard-desc">Human-facing 8-phase vision + full deliverable lists. ~110 KB; the project's narrative spec.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code><span class="filecard-desc">Prod-clean base stack: postgres, redis, backend (healthcheck), frontend (depends_on healthy).</span></div>
+                <div class="filecard"><code class="fileref" data-path="docker-compose.dev.yml">docker-compose.dev.yml</code><span class="filecard-desc">Dev overlay: adds backend bind-mount + uvicorn --reload. Layered by the launchers.</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_biochemistry.sh">run_biochemistry.sh</code><span class="filecard-desc">macOS/Linux launcher with the [r]/[k]/[q]/[v] loop. Invokes base + dev overlay.</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_biochemistry.bat">run_biochemistry.bat</code><span class="filecard-desc">Windows launcher; same contract via goto labels and errorlevel checks.</span></div>
+                <div class="filecard"><code class="fileref" data-path="claude-teams.sh">claude-teams.sh</code><span class="filecard-desc">Launch Claude Code with CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1.</span></div>
+                <div class="filecard"><code class="fileref" data-path="claude-teams.bat">claude-teams.bat</code><span class="filecard-desc">Windows counterpart of claude-teams.sh.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".gitignore">.gitignore</code><span class="filecard-desc">Ignores .env, .claude/, build artifacts, coverage, *.npy/*.npz, postgres/redis data dirs.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".gitattributes">.gitattributes</code><span class="filecard-desc">Line-ending / attribute normalization.</span></div>
+              </div>
+
+              <h3 class="anchor">backend/</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code><span class="filecard-desc">Deps, ruff config, pytest addopts (100% gate), coverage config. Version source-of-truth.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/Dockerfile">backend/Dockerfile</code><span class="filecard-desc">python:3.11-slim, installs uv + build-essential, copies src/, prod CMD, HEALTHCHECK.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/.dockerignore">backend/.dockerignore</code><span class="filecard-desc">Keeps caches/venv out of the build context.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/uv.lock">backend/uv.lock</code><span class="filecard-desc">Resolved dependency lockfile for reproducible installs.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/src/main.py">backend/src/main.py</code><span class="filecard-desc">FastAPI app + the single GET /health route. The whole API surface today.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/src/constants.py">backend/src/constants.py</code><span class="filecard-desc">CODATA-exact universal constants. The ONLY place for physically-meaningful literals.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/src/__init__.py">backend/src/__init__.py</code><span class="filecard-desc">Package marker.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="backend/tests/">backend/tests/</code><span class="filecard-desc">conftest.py (ASGI client fixture), test_health.py, test_constants.py.</span></div>
+              </div>
+
+              <div class="callout warn">
+                <div class="callout-title">Planned backend subpackages (do not exist yet)</div>
+                <div class="callout-body">The master plan and skills reference <code>backend/src/api/</code>, <code>backend/src/models/</code>, <code>backend/src/simulation/</code> (with <code>atomic/</code>, <code>molecular/</code>, …), <code>backend/src/data/</code>, <code>backend/data/force_fields/</code>, and <code>backend/cache/orbitals/</code>. None are present in the current tree — Phase 1, Stage 0.1 creates the first of them. Treat any fileref to those paths in the master plan as a <em>target</em>, not a current file.</div>
+              </div>
+
+              <h3 class="anchor">frontend/</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="frontend/package.json">frontend/package.json</code><span class="filecard-desc">Deps + scripts (dev/build/lint/test/test:coverage).</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/vite.config.ts">frontend/vite.config.ts</code><span class="filecard-desc">Vite + React plugin; Vitest test block (jsdom, 100% thresholds); dev port 5175.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/tsconfig.json">frontend/tsconfig.json</code><span class="filecard-desc">strict: true, noUnusedLocals/Parameters, bundler resolution, vitest + jest-dom types.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/eslint.config.js">frontend/eslint.config.js</code><span class="filecard-desc">Flat ESLint: TS + React Hooks + React Refresh.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/index.html">frontend/index.html</code><span class="filecard-desc">Vite HTML entry; mounts #root and loads main.tsx.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/Dockerfile">frontend/Dockerfile</code><span class="filecard-desc">Multi-stage: node:20-alpine build → nginx:alpine serve dist/.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/nginx.conf">frontend/nginx.conf</code><span class="filecard-desc">SPA routing + /api/ and /ws/ reverse proxy to backend:8000 + asset caching.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/src/main.tsx">frontend/src/main.tsx</code><span class="filecard-desc">React root mount.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/src/App.tsx">frontend/src/App.tsx</code><span class="filecard-desc">Placeholder component: a centered "Biochemistry" heading on a dark background.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/src/App.test.tsx">frontend/src/App.test.tsx</code><span class="filecard-desc">Smoke test asserting the heading renders.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/tests/setup.ts">frontend/tests/setup.ts</code><span class="filecard-desc">Vitest setup; wires cleanup() in afterEach (Vitest doesn't auto-clean).</span></div>
+              </div>
+
+              <div class="callout warn">
+                <div class="callout-title">Planned frontend directories (do not exist yet)</div>
+                <div class="callout-body">The scaffold plan calls for <code>frontend/src/components/ui/</code>, <code>components/three/</code>, <code>hooks/</code>, <code>stores/</code>, <code>shaders/</code>, <code>types/</code>, and <code>workers/</code>. They aren't created yet — <code>src/</code> currently holds only <code>App.tsx</code>, <code>App.test.tsx</code>, and <code>main.tsx</code>.</div>
+              </div>
+
+              <h3 class="anchor">docs/, agent tooling, CI</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code><span class="filecard-desc">~1450-line stage-by-stage build order with GATE checkpoints for all 8 phases.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/status.md">docs/status.md</code><span class="filecard-desc">Live state: Phase 0 complete, what exists, known gaps, what's next.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code><span class="filecard-desc">Semver changelog (v0.2.0, v0.1.0), newest first.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/frontend-protocol.md">docs/frontend-protocol.md</code><span class="filecard-desc">Version-controlled R3F disposal/instancing/LOD/state-ownership contract.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".agents/skills/">.agents/skills/</code><span class="filecard-desc">6 auto-applied agent skills (engine, scale-interface, data-driven, frontend, validation, phase).</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".codex/commands/">.codex/commands/</code><span class="filecard-desc">6 slash commands (scaffold, review, pre-commit, validate, phase-status, new-engine).</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/hooks.json">.codex/hooks.json</code><span class="filecard-desc">Wires the Node .cjs hooks into PreToolUse / PostToolUse / Stop.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="scripts/hooks/">scripts/hooks/</code><span class="filecard-desc">OS-agnostic Node hooks: pre/post-tool-use, stop, stop-memory, shared hookUtils.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code><span class="filecard-desc">5-stage CI for backend + frontend.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code><span class="filecard-desc">Manual semver bump + tag on main via uv version.</span></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="modules">
+          <details>
+            <summary><span class="sec-num">6</span><h2>Core modules</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">There are only two real backend code modules and one frontend component today. The rest of this section documents each, plus the planned engine modules described in the master plan so you know exactly where future logic will land.</p>
+
+              <details class="sub">
+                <summary>FastAPI app + health route <span class="sub-tag">backend/src/main.py</span></summary>
+                <div class="sub-body">
+                  <p>The entire backend HTTP surface. Constructs the <code>FastAPI</code> app with title/description/version metadata and registers a single async route. Because FastAPI auto-generates OpenAPI, this app already serves interactive docs at <code>/docs</code> and the raw schema at <code>/openapi.json</code> — useful even before any real routers exist.</p>
+                  <figure class="code">
+                    <figcaption>backend/src/main.py<span class="lang">python</span></figcaption>
+                    <pre><code>app = FastAPI(
+    title="Biochemistry API",
+    description="Multi-Scale Molecular &amp; Anatomical Chemistry Simulator",
+    version="0.1.0",
+)
+
+@app.get("/health")
+async def health() -&gt; dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "ok"}</code></pre>
+                  </figure>
+                  <p>The <code>/health</code> route is load-bearing for orchestration: the Docker <code>HEALTHCHECK</code> and compose <code>depends_on: { backend: { condition: service_healthy } }</code> both gate on a 200 from it, and <code class="fileref" data-path="backend/tests/test_health.py">backend/tests/test_health.py</code> asserts the exact body.</p>
+                  <div class="callout tip">
+                    <div class="callout-title">Where new routers attach</div>
+                    <div class="callout-body">When Phase 1 adds <code>backend/src/api/elements.py</code>, the pattern (per the master plan) is one <code>APIRouter</code> per resource, included into this app via <code>app.include_router(...)</code>. The <code>version=</code> field here should be bumped to track <code>pyproject.toml</code> at that point.</div>
+                  </div>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="backend/src/main.py">backend/src/main.py</code><span class="filecard-desc">App construction + health route.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="backend/tests/test_health.py">backend/tests/test_health.py</code><span class="filecard-desc">Async test of /health via the ASGI client fixture.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Universal physical constants <span class="sub-tag">backend/src/constants.py</span></summary>
+                <div class="sub-body">
+                  <p>The single sanctioned home for numeric literals that carry physical meaning. Every value is SI and follows the 2019 SI redefinition, so the five defining constants are exact; <code>GAS_CONSTANT</code> is derived as <code>AVOGADRO &times; BOLTZMANN</code> (exact because both inputs are exact). Each constant has a one-line docstring with its symbol and units.</p>
+                  <figure class="code">
+                    <figcaption>backend/src/constants.py<span class="lang">python</span></figcaption>
+                    <pre><code>AVOGADRO: float = 6.022_140_76e23        # N_A (1/mol), exact
+BOLTZMANN: float = 1.380_649e-23         # k_B (J/K), exact
+SPEED_OF_LIGHT: float = 299_792_458.0    # c (m/s), exact
+ELEMENTARY_CHARGE: float = 1.602_176_634e-19  # e (C), exact
+PLANCK: float = 6.626_070_15e-34         # h (J*s), exact
+GAS_CONSTANT: float = AVOGADRO * BOLTZMANN    # R (J/(mol*K))</code></pre>
+                  </figure>
+                  <div class="callout key">
+                    <div class="callout-title">Key concept — data-driven, not hard-coded</div>
+                    <div class="callout-body">Element masses, electronegativities, force-field coefficients, enzyme kinetics, and physiological parameters must <strong>never</strong> appear here or in simulation code — they come from the database or data files. The <code>data-driven-check</code> skill flags any literal in simulation code and routes it to the right home (constants module, element DB, force-field file, or YAML/SBML). The master plan expands this module with Bohr radius, Hartree energy, vacuum permittivity, and the Rydberg constant when Phase 1 needs them.</div>
+                  </div>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="backend/src/constants.py">backend/src/constants.py</code><span class="filecard-desc">The constants.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="backend/tests/test_constants.py">backend/tests/test_constants.py</code><span class="filecard-desc">Parametrized CODATA reference validation + gas-constant approx check.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Frontend root component <span class="sub-tag">frontend/src/App.tsx</span></summary>
+                <div class="sub-body">
+                  <p>A placeholder: a full-viewport flexbox centering an <code>&lt;h1&gt;Biochemistry&lt;/h1&gt;</code> on a <code>#111</code> dark background in monospace. It exists to prove the React + Vite + TypeScript pipeline boots and to give the smoke test something to assert. The dark background matches the planned 3D viewport aesthetic from the master plan (Task 1.3.1 specifies a <code>#111111</code> scene background).</p>
+                  <div class="callout note">
+                    <div class="callout-title">This is the entire frontend today</div>
+                    <div class="callout-body">No Three.js scene, no Zustand store, no periodic table. The R3F/drei/zustand/socket.io dependencies are installed and ready, but the first component to use them (per Task 1.3.1) is the <code>AtomViewport</code>, which Phase 1 will create under <code>frontend/src/components/three/</code>.</div>
+                  </div>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="frontend/src/App.tsx">frontend/src/App.tsx</code><span class="filecard-desc">Placeholder heading component.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="frontend/src/main.tsx">frontend/src/main.tsx</code><span class="filecard-desc">Mounts App at #root.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Planned — Atomic engine (Phase 1) <span class="sub-tag">backend/src/simulation/atomic/ (not built)</span></summary>
+                <div class="sub-body">
+                  <p>Per <code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code> Stage 1.2, the atomic engine is four standalone modules:</p>
+                  <ul>
+                    <li><strong>quantum.py</strong> — compute the full set of (n, l, m_l, m_s) quantum numbers for every electron, using empirical configurations from the DB (so Cr is [Ar]3d&#8309;4s&#185; and Cu is [Ar]3d&#185;&#8304;4s&#185;, not the Aufbau prediction).</li>
+                    <li><strong>orbitals.py</strong> — compute |&psi;|&sup2; probability density on a 64&sup3; voxel grid: radial wavefunction via <code>scipy.special.assoc_laguerre</code>, angular via <code>scipy.special.sph_harm</code>, fully vectorized, cached as <code>.npy</code>. Precompute all 30 orbitals up to n=4.</li>
+                    <li><strong>spectra.py</strong> — emission/absorption wavelengths via the Rydberg formula, validated against the hydrogen Balmer series (H&alpha;=656.3 nm, H&beta;=486.1 nm, H&gamma;=434.0 nm).</li>
+                    <li><strong>ionization.py</strong> — successive-ionization energetics from empirical IE data.</li>
+                  </ul>
+                  <div class="callout note"><div class="callout-title">Not built</div><div class="callout-body">These modules and their <code>backend/src/simulation/</code> parent directory do not exist yet. This entry documents the contract so you know what to create and where.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Planned — Force-field / MD engine (Phase 2) <span class="sub-tag">backend/src/simulation/molecular/ (not built)</span></summary>
+                <div class="sub-body">
+                  <p>The master plan calls this "the most critical code in the entire project." Stage 2.2 breaks it into: a UFF parameter loader, bonded forces (bond/angle/dihedral), non-bonded forces (Lennard-Jones + Coulomb with a <code>cKDTree</code> neighbor list), a velocity-Verlet integrator, a Berendsen thermostat, and an <code>MDEngine</code> runner. The engine must be <em>parameter-agnostic</em> (it takes positions, masses, and force-field parameters without caring whether they're atoms or coarse-grained beads) so the same code drives Phase 3 CG-MD.</p>
+                  <p>The headline validation is energy conservation: total energy drift &lt; 0.1% over 10,000 steps in the NVE ensemble, plus equilibrium bond lengths (H&#8322;=0.74&Aring;, O&#8322;=1.21&Aring;, N&#8322;=1.10&Aring;) and angles (water 104.5&deg;, methane 109.5&deg;).</p>
+                  <div class="callout note"><div class="callout-title">Not built</div><div class="callout-body">Requires RDKit (not yet a dependency) for structure generation. See section 15 for the full phase roadmap.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Planned — Multi-scale coupler &amp; higher engines (Phases 3–8) <span class="sub-tag">backend/src/simulation/coupler/, pbpk/, … (not built)</span></summary>
+                <div class="sub-body">
+                  <p>Phases 3–8 add organelle (coarse-grained MD + reaction-diffusion), cellular (compartmental + Gillespie/tau-leaping gene expression), tissue (agent-based modeling), organ (standalone ODE systems per organ), whole-body PBPK (~20 coupled ODEs), and a universal-organism layer driven by allometric scaling. They all communicate through the <code>SimulationEngine</code> / <code>ScaleCoupler</code> protocols planned for <code>backend/src/simulation/interfaces.py</code>.</p>
+                  <div class="callout note"><div class="callout-title">Not built</div><div class="callout-body">Architectural intent only. The <code>scale-interface</code> skill guards these boundaries when they're implemented.</div></div>
+                </div>
+              </details>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="data-model">
+          <details>
+            <summary><span class="sec-num">7</span><h2>Data models &amp; contracts</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">No domain data models exist in code yet — there are no Pydantic schemas or SQLAlchemy tables. The contracts below are specified in the master plan and become real files in Phase 1+. The one concrete contract today is the WebSocket message envelope shape defined in CLAUDE.md.</p>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept — contracts are sacred and mirrored</div>
+                <div class="callout-body">Pydantic models on the backend and TypeScript interfaces on the frontend must mirror each other exactly. The <code>post-tool-use</code> hook fires a reminder whenever a <code>/types/</code>, <code>/stores/</code>, or <code>/models/</code> file is edited: "verify the TypeScript interface matches the Pydantic model." A contract change is a minor semver bump and must be approved before drifting.</div>
+              </div>
+
+              <h3 class="anchor">WebSocket message envelope (specified, not yet coded)</h3>
+              <p>From <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> (FastAPI section) — the canonical frame format for streaming simulation state:</p>
+              <figure class="code">
+                <figcaption>CLAUDE.md — WSMessage contract<span class="lang">python</span></figcaption>
+                <pre><code>class WSMessage(BaseModel):
+    type: str          # "frame", "event", "error", "config"
+    timestamp: float   # simulation time
+    payload: bytes     # MessagePack-encoded data</code></pre>
+              </figure>
+              <p>Position arrays travel as <code>Float32Array</code> inside the MessagePack payload, never as JSON arrays of numbers — a 10,000-atom molecule at 30 fps is ~3.6 MB/s as binary vs. ~10&times; that as JSON.</p>
+
+              <h3 class="anchor">Planned Phase-1 element contract (Task 1.1.1)</h3>
+              <p>The first real data contract. The Pydantic models will live at <code>backend/src/models/atomic/element.py</code> and the mirroring TS interface at <code>frontend/src/types/Element.ts</code>:</p>
+              <dl class="doc-dl">
+                <dt>ElementBase</dt><dd>atomic_number, symbol, name, group, period, block, category.</dd>
+                <dt>ElementProperties</dt><dd>electronegativity (Pauling), atomic_mass, radii (empirical/calculated/van_der_waals/covalent), ionization_energies[], electron_affinity, oxidation_states, melting/boiling points, density, phase_at_stp, crystal_structure, electron_configuration (+abbreviated).</dd>
+                <dt>Isotope</dt><dd>mass_number, atomic_mass, natural_abundance, half_life, decay_mode.</dd>
+                <dt>ElementFull</dt><dd>ElementBase + ElementProperties + list[Isotope]. The shape the frontend store fetches.</dd>
+              </dl>
+              <p>Canonical Phase-1 units: &Aring;ngstr&ouml;ms for radii, eV for energies, Kelvin for temperatures, g/cm&sup3; for density.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+erDiagram
+    ELEMENT ||--o{ ISOTOPE : has
+    ELEMENT {
+        int atomic_number
+        string symbol
+        string name
+        string block
+        float atomic_mass
+        float electronegativity
+    }
+    ISOTOPE {
+        int mass_number
+        float atomic_mass
+        float natural_abundance
+        string decay_mode
+    }
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>erDiagram
+    ELEMENT ||--o{ ISOTOPE : has
+    ELEMENT {
+        int atomic_number
+        string symbol
+        string name
+        float atomic_mass
+    }
+    ISOTOPE {
+        int mass_number
+        float natural_abundance
+        string decay_mode
+    }</code></pre></figure></div>
+                <figcaption>Planned element &harr; isotope schema (Phase 1, Stage 1.1). Not yet in code.</figcaption>
+              </figure>
+
+              <div class="callout warn">
+                <div class="callout-title">Nothing here is implemented yet</div>
+                <div class="callout-body">There are zero Pydantic domain models and zero SQLAlchemy tables in the repo today. The only Pydantic-derived shape in flight is the FastAPI app metadata. This section is the spec you build against, not a description of current code.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="api">
+          <details>
+            <summary><span class="sec-num">8</span><h2>APIs &amp; interfaces</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">One route exists today. The table below separates the live endpoint from the endpoints the master plan defines for Phase 1 and Phase 2.</p>
+
+              <h3 class="anchor">Live endpoints</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Method</th><th>Path</th><th>Response</th><th>Defined in</th></tr></thead>
+                <tbody>
+                  <tr><td><code>GET</code></td><td><code>/health</code></td><td><code>{"status":"ok"}</code></td><td><code class="fileref" data-path="backend/src/main.py:14">backend/src/main.py:14</code></td></tr>
+                  <tr><td><code>GET</code></td><td><code>/docs</code></td><td>Swagger UI (auto-generated)</td><td>FastAPI built-in</td></tr>
+                  <tr><td><code>GET</code></td><td><code>/openapi.json</code></td><td>OpenAPI schema (auto-generated)</td><td>FastAPI built-in</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Planned endpoints (master plan)</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Method</th><th>Path</th><th>Purpose</th><th>Phase / target file</th></tr></thead>
+                <tbody>
+                  <tr><td><code>GET</code></td><td><code>/api/v1/elements</code></td><td>List/filter all elements (block, group, period, phase, EN range)</td><td>P1 · <code>api/elements.py</code></td></tr>
+                  <tr><td><code>GET</code></td><td><code>/api/v1/elements/{symbol}</code></td><td>Full properties for one element</td><td>P1 · <code>api/elements.py</code></td></tr>
+                  <tr><td><code>GET</code></td><td><code>/api/v1/elements/{symbol}/isotopes</code></td><td>Isotopes for an element</td><td>P1 · <code>api/elements.py</code></td></tr>
+                  <tr><td><code>POST</code></td><td><code>/api/v1/atoms/orbitals</code></td><td>Voxel grid as MessagePack float32</td><td>P1 · <code>api/atoms.py</code></td></tr>
+                  <tr><td><code>POST</code></td><td><code>/api/v1/atoms/quantum-numbers</code></td><td>(n,l,m_l,m_s) per electron</td><td>P1 · <code>api/atoms.py</code></td></tr>
+                  <tr><td><code>POST</code></td><td><code>/api/v1/atoms/spectrum</code></td><td>Spectral lines</td><td>P1 · <code>api/atoms.py</code></td></tr>
+                  <tr><td><code>POST</code></td><td><code>/api/v1/atoms/ionize</code></td><td>Ion state + cumulative IE</td><td>P1 · <code>api/atoms.py</code></td></tr>
+                  <tr><td><code>POST</code></td><td><code>/api/v1/molecules/from-smiles</code></td><td>SMILES → 3D MoleculeStructure</td><td>P2 · <code>api/molecules.py</code></td></tr>
+                  <tr><td><code>WS</code></td><td><code>/ws/simulation</code></td><td>Stream MD frames (MessagePack)</td><td>P2 · <code>api/simulation.py</code></td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout note">
+                <div class="callout-title">nginx proxy is already wired for these</div>
+                <div class="callout-body"><code class="fileref" data-path="frontend/nginx.conf">frontend/nginx.conf</code> already reverse-proxies <code>/api/</code> and <code>/ws/</code> to <code>backend:8000</code> (with WebSocket upgrade headers on <code>/ws/</code>), so the production routing for these planned endpoints exists before the endpoints themselves do.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="config">
+          <details>
+            <summary><span class="sec-num">9</span><h2>Configuration &amp; environment</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">All ports and credentials come from environment variables with <code>${VAR:-default}</code> defaults in the compose file. There is no committed <code>.env.example</code>; <code>.env</code> is gitignored. The defaults below let the stack run with zero configuration.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Variable</th><th>Default</th><th>Meaning</th><th>Where</th></tr></thead>
+                <tbody>
+                  <tr><td><code>POSTGRES_USER</code></td><td><code>biochemistry</code></td><td>Postgres role</td><td>compose</td></tr>
+                  <tr><td><code>POSTGRES_PASSWORD</code></td><td><code>biochemistry_dev</code></td><td>Postgres password (dev default)</td><td>compose</td></tr>
+                  <tr><td><code>POSTGRES_DB</code></td><td><code>biochemistry</code></td><td>Database name</td><td>compose</td></tr>
+                  <tr><td><code>POSTGRES_PORT</code></td><td><code>5522</code></td><td>Host port → container 5432</td><td>compose</td></tr>
+                  <tr><td><code>REDIS_PORT</code></td><td><code>6522</code></td><td>Host port → container 6379</td><td>compose</td></tr>
+                  <tr><td><code>BACKEND_PORT</code></td><td><code>8222</code></td><td>Host port → backend container 8000</td><td>compose</td></tr>
+                  <tr><td><code>FRONTEND_PORT</code></td><td><code>5175</code></td><td>Host port → frontend nginx 80</td><td>compose</td></tr>
+                  <tr><td><code>DATABASE_URL</code></td><td><code>postgresql+asyncpg://…@postgres:5432/biochemistry</code></td><td>Async SQLAlchemy DSN (passed to backend)</td><td>compose</td></tr>
+                  <tr><td><code>REDIS_URL</code></td><td><code>redis://redis:6379/0</code></td><td>Redis connection (passed to backend)</td><td>compose</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout warn">
+                <div class="callout-title">Unusual host ports</div>
+                <div class="callout-body">The host-side ports are deliberately offset (<code>5522</code>, <code>6522</code>, <code>8222</code>, <code>5175</code>) to avoid colliding with other projects running default Postgres/Redis/Vite ports on the same machine. Inside the Docker network, services still use standard ports (5432/6379/8000/80). The Vite <em>dev</em> server also listens on 5175 (<code class="fileref" data-path="frontend/vite.config.ts:8">frontend/vite.config.ts:8</code>) for consistency with the containerized frontend port.</div>
+              </div>
+
+              <h3 class="anchor">Tooling config files</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code><span class="filecard-desc">ruff (E,F,I,N,UP,ANN; len 120), pytest (asyncio auto, 100% gate), coverage (branch).</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/tsconfig.json">frontend/tsconfig.json</code><span class="filecard-desc">strict TS, no unused locals/params, bundler resolution.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/vite.config.ts">frontend/vite.config.ts</code><span class="filecard-desc">Vite + Vitest (jsdom, 100% lines/functions/branches/statements).</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/eslint.config.js">frontend/eslint.config.js</code><span class="filecard-desc">Flat ESLint config.</span></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="run">
+          <details>
+            <summary><span class="sec-num">10</span><h2>How to run it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">The launchers wrap Docker Compose with the standard <code>[r]/[k]/[q]/[v]</code> control loop and layer the dev overlay on top of the base file automatically.</p>
+
+              <h3 class="anchor">Docker (recommended)</h3>
+              <ol class="steps">
+                <li>From the project root, run <code class="fileref" data-path="run_biochemistry.sh">run_biochemistry.sh</code> (macOS/Linux) or <code class="fileref" data-path="run_biochemistry.bat">run_biochemistry.bat</code> (Windows).</li>
+                <li>The script runs <code>docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d</code>, building backend + frontend images and starting Postgres + Redis.</li>
+                <li>Open the Frontend at <code>http://localhost:5175</code>, the Backend at <code>http://localhost:8222</code>, and API docs at <code>http://localhost:8222/docs</code>.</li>
+                <li>At the menu prompt: <code>[r]</code> rebuild &amp; relaunch (loops forever), <code>[k]</code> stop keep images, <code>[q]</code> stop + remove project images, <code>[v]</code> full cleanup (images + volumes). Unrecognized input reprints the menu without tearing down the stack.</li>
+              </ol>
+
+              <div class="callout tip">
+                <div class="callout-title">Why two compose files</div>
+                <div class="callout-body">The base <code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code> is prod-clean: no bind-mounts, no <code>--reload</code>. The launcher adds <code class="fileref" data-path="docker-compose.dev.yml">docker-compose.dev.yml</code>, which bind-mounts <code>./backend/src</code> into the container and overrides the command to add <code>uvicorn --reload</code> for hot reload. For a prod-style run, use only the base file: <code>docker compose -f docker-compose.yml up --build -d</code>.</div>
+              </div>
+
+              <h3 class="anchor">Backend without Docker</h3>
+              <ol class="steps">
+                <li><code>cd backend</code>, then <code>uv sync --extra dev</code> to install runtime + dev deps.</li>
+                <li><code>uv run uvicorn src.main:app --reload --port 8000</code> to serve the API.</li>
+                <li><code>uv run pytest</code> to run tests (enforces the 100% coverage gate).</li>
+                <li><code>uv run ruff check .</code> and <code>uv run ruff format --check .</code> to lint/format.</li>
+              </ol>
+
+              <h3 class="anchor">Frontend without Docker</h3>
+              <ol class="steps">
+                <li><code>cd frontend</code>, then <code>pnpm install</code>.</li>
+                <li><code>pnpm dev</code> to start Vite on <code>http://localhost:5175</code>.</li>
+                <li><code>pnpm test:coverage</code> for Vitest with the 100% thresholds; <code>pnpm lint</code> for ESLint; <code>pnpm build</code> for a production build.</li>
+              </ol>
+
+              <div class="callout warn">
+                <div class="callout-title">Windows launcher run-context gotcha</div>
+                <div class="callout-body">The <code>.bat</code> launcher uses <code>set /p</code> for its interactive menu. Per the user's recorded preference, running a <code>.bat</code> via PyCharm's right-click → Run is a non-TTY context where <code>set /p</code> hangs and output buffers — run launchers from a real terminal (or enable "Emulate terminal" in the run config) instead of fixing the script.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="editing">
+          <details>
+            <summary><span class="sec-num">11</span><h2>How to edit &amp; extend it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">This is the owner-focused section: where things go and the exact pattern to follow. Because the project is scaffold-stage, "extending it" mostly means executing the next master-plan task — so the guidance below maps the immediate work to concrete files.</p>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept — read the plan, then fill the empty package</div>
+                <div class="callout-body">The build order is authoritative. Before writing any module, find its task in <code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code> (it gives the exact target file, dependencies, and validation criteria), confirm prerequisite tasks are done, and only then implement. The agent skills enforce this if you're working with Claude/Codex.</div>
+              </div>
+
+              <h3 class="anchor">To add a new REST endpoint (the immediate Phase-1 work)</h3>
+              <ol class="steps">
+                <li>Create <code>backend/src/api/&lt;resource&gt;.py</code> with an <code>APIRouter</code> (one router per resource — elements, atoms, molecules…).</li>
+                <li>Define request/response shapes as Pydantic v2 models under <code>backend/src/models/&lt;domain&gt;/</code> — one model per file, mirroring any TS interface.</li>
+                <li>Register the router in <code class="fileref" data-path="backend/src/main.py">backend/src/main.py</code> via <code>app.include_router(router, prefix="/api/v1")</code>.</li>
+                <li>Add an integration test under <code>backend/tests/</code> using the <code>client</code> fixture from <code class="fileref" data-path="backend/tests/conftest.py">backend/tests/conftest.py</code>. Coverage must stay at 100% or <code>pytest</code> fails.</li>
+              </ol>
+
+              <h3 class="anchor">To add a simulation engine</h3>
+              <ol class="steps">
+                <li>Create the module under <code>backend/src/simulation/&lt;scale&gt;/</code>. The <code>engine-protocol</code> skill requires you to write the four-property docstring (input / output / timestep / spatial resolution) <em>before</em> any logic.</li>
+                <li>Use NumPy ndarrays with explicit dtypes (<code>np.float64</code> for positions/forces, <code>np.int32</code> for indices); document array shapes; no Python loops over particles; use <code>scipy.spatial.cKDTree</code> for neighbor searches.</li>
+                <li>Reference <code class="fileref" data-path="backend/src/constants.py">backend/src/constants.py</code> for any physical constant; load domain parameters from the DB or data files — never hard-code them.</li>
+                <li>Add a mirroring test under <code>backend/tests/simulation/&lt;scale&gt;/</code> with at least one <code>np.testing.assert_allclose</code> check against a known analytical/published value. No mocking of physics.</li>
+                <li>There is a slash command for this: <code class="fileref" data-path=".codex/commands/new-engine.md">.codex/commands/new-engine.md</code> scaffolds the engine + test + interface contract.</li>
+              </ol>
+
+              <h3 class="anchor">To add a Three.js / R3F renderer</h3>
+              <ol class="steps">
+                <li><strong>Read <code class="fileref" data-path="docs/frontend-protocol.md">docs/frontend-protocol.md</code> first.</strong> It is the merge-gating contract.</li>
+                <li>Put the component under <code>frontend/src/components/three/</code>. Use <code>useMemo</code> for geometry/material, <code>useRef</code> for Three.js objects (never state/Zustand), and <code>useFrame</code> for per-frame updates.</li>
+                <li>Every <code>new THREE.*</code> needs a matching <code>.dispose()</code> in a cleanup path. Use <code>InstancedMesh</code> past ~100 objects, <code>LOD</code> past 10k, <code>Points</code> past 100k.</li>
+                <li>Custom shaders go in <code>frontend/src/shaders/</code> as separate <code>.vert</code>/<code>.frag</code> files — never inline template literals.</li>
+                <li>Simulation state goes in a Zustand store under <code>frontend/src/stores/</code>; UI-only state stays in React component state.</li>
+              </ol>
+
+              <h3 class="anchor">Conventions to respect</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Area</th><th>Rule</th></tr></thead>
+                <tbody>
+                  <tr><td>One concept per file</td><td>One class/component/hook/store/interface per file. No god files, no <code>utils.ts</code> grab-bags.</td></tr>
+                  <tr><td>Python module header</td><td>Every module starts with <code>from __future__ import annotations</code>; full type hints (ruff <code>ANN</code>).</td></tr>
+                  <tr><td>Domain variable names</td><td>Use <code>r</code>/<code>positions</code>, <code>v</code>/<code>velocities</code>, <code>f</code>/<code>forces</code>, <code>dt</code>, <code>T</code>, <code>P</code>, <code>C</code> — not "clarified" names.</td></tr>
+                  <tr><td>Units everywhere</td><td>Document units on every physical variable and convert only at scale boundaries.</td></tr>
+                  <tr><td>Binary over JSON</td><td>Large numeric arrays go over WebSocket as MessagePack/Float32Array, never JSON.</td></tr>
+                  <tr><td>Git is the owner's</td><td>The Stop hook reminds: never run a mutating git command; suggest a commit message instead.</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Docs you must update after a change</h3>
+              <p>Per the Stop hook and global conventions: update <code class="fileref" data-path="docs/status.md">docs/status.md</code> (live state) and <code class="fileref" data-path="docs/versions.md">docs/versions.md</code> (compute the next semver explicitly — additive feature = minor bump under the current unreleased entry). Do not edit the <code>version</code> field in <code>pyproject.toml</code> directly; the release workflow owns that.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="testing">
+          <details>
+            <summary><span class="sec-num">12</span><h2>Testing</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Both sides target 100% coverage, enforced in-tool so a passing test run implies a passing gate. There are three tests today; every new module is expected to ship with its mirror test.</p>
+
+              <h3 class="anchor">Backend — pytest</h3>
+              <p>Configured in <code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code>: <code>asyncio_mode = "auto"</code>, <code>addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100 --strict-markers -ra"</code>, branch coverage on. The async HTTP test pattern uses an in-process client (no live server, no network):</p>
+              <figure class="code">
+                <figcaption>backend/tests/conftest.py<span class="lang">python</span></figcaption>
+                <pre><code>@pytest_asyncio.fixture
+async def client() -&gt; AsyncIterator[AsyncClient]:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac</code></pre>
+              </figure>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="backend/tests/test_health.py">backend/tests/test_health.py</code><span class="filecard-desc">Asserts GET /health returns 200 and {"status":"ok"}.</span></div>
+                <div class="filecard"><code class="fileref" data-path="backend/tests/test_constants.py">backend/tests/test_constants.py</code><span class="filecard-desc">Parametrized CODATA validation; gas-constant pytest.approx check.</span></div>
+              </div>
+
+              <h3 class="anchor">Frontend — Vitest + RTL</h3>
+              <p>Vitest config in <code class="fileref" data-path="frontend/vite.config.ts">frontend/vite.config.ts</code>: jsdom environment, 100% thresholds on lines/functions/branches/statements, <code>src/main.tsx</code> excluded from coverage. The known Vitest pitfall — no auto-cleanup — is handled in setup:</p>
+              <figure class="code">
+                <figcaption>frontend/tests/setup.ts<span class="lang">typescript</span></figcaption>
+                <pre><code>import { cleanup } from '@testing-library/react';
+import { afterEach } from 'vitest';
+afterEach(() =&gt; cleanup());</code></pre>
+              </figure>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="frontend/src/App.test.tsx">frontend/src/App.test.tsx</code><span class="filecard-desc">Renders App, asserts the "Biochemistry" heading is in the document.</span></div>
+              </div>
+
+              <h3 class="anchor">Validation discipline (for future numerical code)</h3>
+              <p>The <code>validation-protocol</code> skill governs simulation tests: use <code>np.testing.assert_allclose</code> with documented tolerances (never <code>==</code> for floats), validate at least one case against a published reference value, parametrize over multiple elements/molecules/conditions, and never mock physics or the database. The master plan's GATE checkpoints (e.g., GATE 2.2: H&#8322; bond length 0.74&plusmn;0.02&Aring;, energy drift &lt;0.1% over 10k steps) are the concrete validation targets.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="ci">
+          <details>
+            <summary><span class="sec-num">13</span><h2>Build, CI &amp; release</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">CI runs on GitHub Actions (the remote is on github.com) as a five-stage pipeline per side. Releases are a manual, workflow-dispatched version bump.</p>
+
+              <h3 class="anchor">CI pipeline</h3>
+              <p><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code> runs on push/PR to <code>main</code>. The stages map to lint → test → coverage gate → build → docker-build; the coverage gate is folded into the test job (in-tool enforcement), not a separate job.</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Job</th><th>Runs</th><th>Notes</th></tr></thead>
+                <tbody>
+                  <tr><td>backend / lint</td><td><code>ruff check .</code> + <code>ruff format --check .</code></td><td>uv-cached</td></tr>
+                  <tr><td>backend / test + gate</td><td><code>uv run pytest</code></td><td>100% gate via addopts</td></tr>
+                  <tr><td>backend / build</td><td><code>uv build</code></td><td>needs lint + test</td></tr>
+                  <tr><td>backend / docker-build</td><td>buildx against <code>backend/Dockerfile</code></td><td>tag <code>biochemistry-backend:ci</code>, no push</td></tr>
+                  <tr><td>frontend / lint</td><td><code>pnpm lint</code></td><td>pnpm-cached</td></tr>
+                  <tr><td>frontend / test + gate</td><td><code>pnpm test:coverage</code></td><td>Vitest 100% thresholds</td></tr>
+                  <tr><td>frontend / build</td><td><code>pnpm build</code></td><td><code>tsc &amp;&amp; vite build</code></td></tr>
+                  <tr><td>frontend / docker-build</td><td>buildx against <code>frontend/Dockerfile</code></td><td>tag <code>biochemistry-frontend:ci</code>, no push</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Docker images</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="backend/Dockerfile">backend/Dockerfile</code><span class="filecard-desc">python:3.11-slim + uv + build-essential. Prod CMD (no --reload). Container HEALTHCHECK on /health.</span></div>
+                <div class="filecard"><code class="fileref" data-path="frontend/Dockerfile">frontend/Dockerfile</code><span class="filecard-desc">Stage 1 node:20-alpine pnpm build → Stage 2 nginx:alpine serves dist/ with nginx.conf.</span></div>
+              </div>
+
+              <h3 class="anchor">Release / versioning</h3>
+              <p><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code> is a manual <code>workflow_dispatch</code> with a <code>bump</code> choice (patch/minor/major). It runs <code>uv version --bump</code> against <code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code> (the semver source-of-truth), then commits and tags <code>v&lt;new&gt;</code> on <code>main</code>. You document the next version in <code class="fileref" data-path="docs/versions.md">docs/versions.md</code> manually; the workflow performs the actual field bump.</p>
+
+              <div class="callout note">
+                <div class="callout-title">Global convention says GitLab, this repo uses GitHub</div>
+                <div class="callout-body">The owner's global preference is GitLab CI for private projects, but this repo's origin is on github.com, so CI/CD lives in GitHub Actions (<code class="fileref dir" data-path=".github/workflows/">.github/workflows/</code>). That deviation is intentional and recorded in <code class="fileref" data-path="docs/versions.md">docs/versions.md</code>.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="roadmap">
+          <details>
+            <summary><span class="sec-num">14</span><h2>Roadmap &amp; phases</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Eight phases, each independently demonstrable, each building on the validated output of the previous. Phase 0 (scaffold + hardening) is done; Phase 1 (atomic) is the active target. The Gantt below reflects dependency order, not calendar dates.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+gantt
+    title Phase build order (relative, not calendar)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+    section Foundations
+    Phase 0 Scaffold (done)   :done, p0, 2026-03-01, 60d
+    Phase 1 Atomic (active)   :active, p1, after p0, 90d
+    Phase 2 Molecular         :p2, after p1, 120d
+    section Mid-scale
+    Phase 3 Organelle         :p3, after p2, 120d
+    Phase 4 Cellular          :p4, after p3, 90d
+    Phase 5 Tissue            :p5, after p4, 90d
+    section Macro-scale
+    Phase 6 Organ             :p6, after p5, 120d
+    Phase 7 Whole body PBPK   :p7, after p6, 90d
+    Phase 8 Universal organism:p8, after p7, 120d
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>gantt
+    title Phase build order
+    dateFormat  YYYY-MM-DD
+    section Foundations
+    Phase 0 Scaffold :done, p0, 2026-03-01, 60d
+    Phase 1 Atomic :active, p1, after p0, 90d
+    Phase 2 Molecular :p2, after p1, 120d
+    section Mid-scale
+    Phase 3 Organelle :p3, after p2, 120d
+    Phase 4 Cellular :p4, after p3, 90d
+    Phase 5 Tissue :p5, after p4, 90d
+    section Macro-scale
+    Phase 6 Organ :p6, after p5, 120d
+    Phase 7 PBPK :p7, after p6, 90d
+    Phase 8 Organism :p8, after p7, 120d</code></pre></figure></div>
+                <figcaption>From docs/MASTER_PLAN.md and README.md.</figcaption>
+              </figure>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Phase</th><th>Scale</th><th>What it delivers</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>0</td><td>—</td><td>Scaffold, Docker, CI, launchers, agent tooling, constants, test harness</td><td>Complete (v0.2.0)</td></tr>
+                  <tr><td>1</td><td>Atomic</td><td>Element DB, quantum/orbital/spectra/ionization engines, periodic table + 3D atom viewport (Bohr / electron cloud / space-filling)</td><td>Next</td></tr>
+                  <tr><td>2</td><td>Molecular</td><td>RDKit structure gen, UFF force field + velocity-Verlet MD, WebSocket frame streaming, ball-and-stick / surface / ribbon renderers</td><td>Planned</td></tr>
+                  <tr><td>3</td><td>Organelle</td><td>Multi-scale interface contract, coarse-grained (MARTINI) MD, reaction-diffusion, organelle SDF geometry</td><td>Planned</td></tr>
+                  <tr><td>4</td><td>Cellular</td><td>Compartmental concentration model, Gillespie/tau-leaping gene expression, cell dashboard (Chart.js)</td><td>Planned</td></tr>
+                  <tr><td>5</td><td>Tissue</td><td>Agent-based modeling, vessel networks, Points-based cell rendering (100k+ cells)</td><td>Planned</td></tr>
+                  <tr><td>6</td><td>Organ</td><td>Per-organ ODE physiology modules, anatomical meshes, procedural airway tree (Weibel)</td><td>Planned</td></tr>
+                  <tr><td>7</td><td>Whole body</td><td>~20-ODE PBPK model, seamless macro→nano zoom, scripted cigarette scenario</td><td>Planned</td></tr>
+                  <tr><td>8</td><td>Organism</td><td>Allometric scaling, organism YAML schema, deep substance database (ADME + PD)</td><td>Planned</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout key">
+                <div class="callout-title">Definition of Done (per phase)</div>
+                <div class="callout-body">From <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code>: (1) backend tests pass, (2) frontend renders &amp; is interactive, (3) FastAPI <code>/docs</code> documents the API, (4) a demo scenario runs end-to-end, (5) performance benchmarks recorded, (6) the zoom transition from this phase to the previous works, (7) at least one validation test compares against published reference data. A phase isn't done until all seven hold — and the gate is "errors compound across scales," so an unvalidated lower scale poisons every scale above it.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="agent-tooling">
+          <details>
+            <summary><span class="sec-num">15</span><h2>Agent tooling (hooks, skills, commands)</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A distinctive, fully-built part of this repo: the <code>.agents/</code>, <code>.codex/</code>, and <code>scripts/hooks/</code> layer that makes Claude/Codex enforce the architecture automatically. Worth understanding even if you edit by hand — it documents the invariants the project cares about.</p>
+
+              <h3 class="anchor">Hooks (OS-agnostic Node)</h3>
+              <p>Wired in <code class="fileref" data-path=".codex/hooks.json">.codex/hooks.json</code>. All hooks are <code>node -e require('scripts/hooks/*.cjs')</code> (never bash/jq/python — the recorded fleet rule is that cmd.exe can't parse those and python may be missing). They read tool data from stdin JSON, not env vars.</p>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="scripts/hooks/pre-tool-use.cjs">scripts/hooks/pre-tool-use.cjs</code><span class="filecard-desc">Blocks writes to sensitive files (.env, credentials.*, secrets.*, *.pem/*.key/*.p12, id_rsa…).</span></div>
+                <div class="filecard"><code class="fileref" data-path="scripts/hooks/post-tool-use.cjs">scripts/hooks/post-tool-use.cjs</code><span class="filecard-desc">Injects contextual reminders when simulation/model files or type/store files are edited.</span></div>
+                <div class="filecard"><code class="fileref" data-path="scripts/hooks/stop.cjs">scripts/hooks/stop.cjs</code><span class="filecard-desc">On turn end, reports uncommitted files (git-read-only) and nudges to update docs/.</span></div>
+                <div class="filecard"><code class="fileref" data-path="scripts/hooks/stop-memory.cjs">scripts/hooks/stop-memory.cjs</code><span class="filecard-desc">Persistent-memory update hook.</span></div>
+                <div class="filecard"><code class="fileref" data-path="scripts/hooks/hookUtils.cjs">scripts/hooks/hookUtils.cjs</code><span class="filecard-desc">Shared helpers: stdin payload parsing, sensitive-path matcher, read-only git, project paths.</span></div>
+              </div>
+
+              <h3 class="anchor">Skills (auto-applied protocols)</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/engine-protocol/SKILL.md">engine-protocol</code><span class="filecard-desc">Forces the four-property docstring + dtype/vectorization/test rules on simulation/ edits.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/scale-interface/SKILL.md">scale-interface</code><span class="filecard-desc">Guards cross-scale boundaries; requires updating adjacent engines + unit conversions.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/data-driven-check/SKILL.md">data-driven-check</code><span class="filecard-desc">Flags hard-coded numbers, routing each to constants / DB / param file / YAML.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/frontend-protocol/SKILL.md">frontend-protocol</code><span class="filecard-desc">Mirror of docs/frontend-protocol.md for R3F edits.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/validation-protocol/SKILL.md">validation-protocol</code><span class="filecard-desc">assert_allclose, reference validation, no mocking of physics.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/phase-awareness/SKILL.md">phase-awareness</code><span class="filecard-desc">Orients to the current phase + constraints at session start.</span></div>
+              </div>
+
+              <h3 class="anchor">Slash commands</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/scaffold.md">scaffold</code><span class="filecard-desc">Scaffolds infrastructure / a new module's directory layout.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/new-engine.md">new-engine</code><span class="filecard-desc">Scaffolds a simulation engine + test + interface contract.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/review.md">review</code><span class="filecard-desc">Reviews changed code against project standards (read-only).</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/pre-commit.md">pre-commit</code><span class="filecard-desc">Read-only pre-commit audit; reports READY / NOT READY, never commits.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/validate.md">validate</code><span class="filecard-desc">Validates simulation code for correctness + reference agreement.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/commands/phase-status.md">phase-status</code><span class="filecard-desc">Assesses progress across the 8-phase roadmap; outputs a status table.</span></div>
+              </div>
+
+              <div class="callout note">
+                <div class="callout-title">Why AGENTS.md and .agents/ exist alongside CLAUDE.md and .codex/</div>
+                <div class="callout-body"><code class="fileref" data-path="AGENTS.md">AGENTS.md</code> is a byte-identical copy of <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> so non-Claude agents read the same rules. The <code>.claude/</code> directory is gitignored (hook state shouldn't pollute the repo), which is why the canonical R3F protocol is committed at <code class="fileref" data-path="docs/frontend-protocol.md">docs/frontend-protocol.md</code> and the skills are duplicated under the tracked <code>.agents/</code> path.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="glossary">
+          <details>
+            <summary><span class="sec-num">16</span><h2>Domain glossary</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Terms a newcomer needs to follow the master plan and the (future) simulation code.</p>
+              <dl class="doc-dl">
+                <dt>Scale</dt><dd>One of the eight levels of biological organization the project models: atomic, molecular, organelle, cellular, tissue, organ, whole body, organism. Each has its own engine and unit system.</dd>
+                <dt>Scale-crossing contract</dt><dd>The typed handoff between adjacent scales (e.g., molecular → organelle passes coarse-grained beads + reaction rates). Units convert explicitly at the boundary.</dd>
+                <dt>Engine four-property contract</dt><dd>Every simulation engine declares its input, output, timestep, and spatial resolution. The unit of architectural reuse.</dd>
+                <dt>Progressive fidelity</dt><dd>Running each region at one of four detail levels — full, reduced, statistical summary, or frozen/cached — chosen by camera distance, so compute is spent where the user is looking.</dd>
+                <dt>Force field</dt><dd>The parameter set (bond/angle/dihedral constants, LJ &epsilon;/&sigma;, partial charges) that defines molecular potential energy. UFF for all-atom (Phase 2), MARTINI for coarse-grained (Phase 3). Loaded from data files, never hard-coded.</dd>
+                <dt>Molecular dynamics (MD)</dt><dd>Time-stepping atoms under force-field forces using the velocity-Verlet integrator. Correctness is judged by energy conservation in the NVE ensemble.</dd>
+                <dt>NVE / NVT ensemble</dt><dd>NVE = constant number, volume, energy (used to validate energy conservation). NVT = constant temperature, held by a thermostat (Berendsen here).</dd>
+                <dt>Neighbor list</dt><dd>A precomputed list of atom pairs within a cutoff (built with <code>scipy.spatial.cKDTree</code>) that turns O(N&sup2;) non-bonded force computation into ~O(N).</dd>
+                <dt>Orbital voxel grid</dt><dd>A 64&sup3; grid of |&psi;|&sup2; probability-density values for a hydrogen-like orbital, cached as <code>.npy</code>, rendered as an isosurface or volume in the frontend.</dd>
+                <dt>CPK coloring</dt><dd>The standard element color convention (C=gray, O=red, N=blue, H=white, S=yellow…) used by the atom/molecule renderers.</dd>
+                <dt>PBPK</dt><dd>Physiologically-based pharmacokinetic model — the ~20-ODE whole-body system (Phase 7) tracking a substance through tissue compartments via blood flow and partition coefficients.</dd>
+                <dt>Allometric scaling</dt><dd>Predicting physiological parameters from body mass via power laws (heart rate &prop; M^&minus;0.25, metabolic rate &prop; M^0.75). The Phase-8 shortcut to parameterizing arbitrary organisms.</dd>
+                <dt>InstancedMesh / LOD / Points</dt><dd>Three.js scaling primitives: instancing past ~100 identical objects, level-of-detail past 10k, point sprites past 100k. Mandated by the frontend protocol.</dd>
+                <dt>MessagePack</dt><dd>Binary serialization for simulation frames over WebSocket; decoded in a Web Worker so the main render thread never blocks.</dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="file-index">
+          <details>
+            <summary><span class="sec-num">17</span><h2>Key files index</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A single jump-off map of the files that matter most.</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>File</th><th>What it's for</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code></td><td>The rulebook: stack, architecture principles, per-phase notes, pitfalls, DoD. Read first.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/MASTER_PLAN.md">docs/MASTER_PLAN.md</code></td><td>Authoritative build order — every task's target file, deps, and validation gate.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/status.md">docs/status.md</code></td><td>Live state: what exists now, known gaps, the next concrete task.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></td><td>Semver changelog (v0.2.0 current).</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/frontend-protocol.md">docs/frontend-protocol.md</code></td><td>Merge-gating R3F disposal/instancing/LOD contract.</td></tr>
+                  <tr><td><code class="fileref" data-path="README.md">README.md</code></td><td>The 8-phase vision and full deliverable specs (the narrative source).</td></tr>
+                  <tr><td><code class="fileref" data-path="backend/src/main.py">backend/src/main.py</code></td><td>FastAPI app + the only live route (/health).</td></tr>
+                  <tr><td><code class="fileref" data-path="backend/src/constants.py">backend/src/constants.py</code></td><td>CODATA-exact constants — the only home for physical literals.</td></tr>
+                  <tr><td><code class="fileref" data-path="backend/pyproject.toml">backend/pyproject.toml</code></td><td>Deps, ruff/pytest/coverage config, version source-of-truth.</td></tr>
+                  <tr><td><code class="fileref" data-path="frontend/src/App.tsx">frontend/src/App.tsx</code></td><td>Placeholder root component (the entire UI today).</td></tr>
+                  <tr><td><code class="fileref" data-path="frontend/vite.config.ts">frontend/vite.config.ts</code></td><td>Vite + Vitest config (100% coverage thresholds).</td></tr>
+                  <tr><td><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code></td><td>Prod-clean 4-service stack with healthchecks.</td></tr>
+                  <tr><td><code class="fileref" data-path="docker-compose.dev.yml">docker-compose.dev.yml</code></td><td>Dev overlay: bind-mount + --reload.</td></tr>
+                  <tr><td><code class="fileref" data-path="run_biochemistry.sh">run_biochemistry.sh</code></td><td>Launcher with the [r]/[k]/[q]/[v] loop.</td></tr>
+                  <tr><td><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code></td><td>5-stage CI for backend + frontend.</td></tr>
+                  <tr><td><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code></td><td>Manual semver bump + tag.</td></tr>
+                  <tr><td><code class="fileref" data-path="scripts/hooks/hookUtils.cjs">scripts/hooks/hookUtils.cjs</code></td><td>Shared agent-hook helpers.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </details>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <button id="backTop" title="Back to top"><span class="ico"></span></button>
+
+  <footer class="doc-footer">
+    <p>Human-facing documentation for <strong>Biochemistry</strong> · generated 2026-06-07.
+    Styling and behavior are inlined directly into this file — it is fully self-contained and needs no external assets. Re-open after editing source to keep this guide in sync.</p>
+  </footer>
+
+  <script>
+/* ============================================================================
+   doc.js — Shared behavior for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external script).
+   Responsibilities:
+     - theme (light/dark) with persistence
+     - auto-built table of contents from <section class="doc-section"> + h3 anchors
+     - scroll-spy active highlighting
+     - live full-text section filter (search box)
+     - expand-all / collapse-all
+     - click-to-copy file references and code blocks
+     - scroll progress bar + back-to-top
+     - mermaid diagram rendering (CDN) with graceful source fallback
+     - print = expand everything
+   No build step, no framework. Pure DOM.
+   ============================================================================ */
+(function () {
+  "use strict";
+
+  var THEME_KEY = "projDocTheme";
+
+  /* ---- theme (apply ASAP to avoid flash) ---- */
+  function preferredTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    var btn = document.getElementById("themeToggle");
+    if (btn) {
+      var ico = btn.querySelector(".ico");
+      if (ico) ico.style.webkitMaskImage = ico.style.maskImage = "var(--icon-" + (t === "dark" ? "sun" : "moon") + ")";
+      btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    }
+  }
+  applyTheme(preferredTheme());
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  function init() {
+    applyTheme(preferredTheme());
+    buildTOC();
+    wireControls();
+    wireFileRefs();
+    wireCodeCopy();
+    wireScrollProgress();
+    wireBackToTop();
+    wireScrollSpy();
+    wirePrint();
+    initMermaid();
+    handleInitialHash();
+  }
+
+  /* ---- slugify ---- */
+  function slug(s) {
+    return s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 60);
+  }
+
+  /* ---- TOC ---- */
+  function buildTOC() {
+    var toc = document.getElementById("docToc");
+    if (!toc) return;
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    if (!sections.length) return;
+    var ul = document.createElement("ul");
+    var n = 0;
+    sections.forEach(function (sec) {
+      n++;
+      if (!sec.id) sec.id = "sec-" + n;
+      var h2 = sec.querySelector("summary h2");
+      var title = h2 ? h2.textContent.trim() : ("Section " + n);
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = "#" + sec.id;
+      a.dataset.target = sec.id;
+      a.innerHTML = '<span class="toc-num">' + n + "</span>" + escapeHTML(title);
+      li.appendChild(a);
+      ul.appendChild(li);
+
+      // nested h3 anchors marked with class "anchor"
+      var subs = sec.querySelectorAll("h3.anchor");
+      Array.prototype.forEach.call(subs, function (h3) {
+        if (!h3.id) h3.id = sec.id + "-" + slug(h3.textContent);
+        var sli = document.createElement("li");
+        var sa = document.createElement("a");
+        sa.href = "#" + h3.id;
+        sa.className = "sub";
+        sa.dataset.target = h3.id;
+        sa.textContent = h3.textContent.trim();
+        sli.appendChild(sa);
+        ul.appendChild(sli);
+      });
+    });
+    toc.appendChild(ul);
+
+    // smooth scroll with header offset, and open target section
+    toc.addEventListener("click", function (e) {
+      var a = e.target.closest("a");
+      if (!a) return;
+      e.preventDefault();
+      var id = a.dataset.target;
+      revealAndScroll(id);
+      history.replaceState(null, "", "#" + id);
+    });
+  }
+
+  function revealAndScroll(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // open the enclosing section + any parent <details>
+    var d = el.closest("details");
+    while (d) { d.open = true; d = d.parentElement ? d.parentElement.closest("details") : null; }
+    var sec = el.closest(".doc-section") || el;
+    if (sec.querySelector) {
+      var det = sec.querySelector(":scope > details");
+      if (det) det.open = true;
+    }
+    setTimeout(function () {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 30);
+  }
+
+  /* ---- controls (expand/collapse/theme/print/search) ---- */
+  function wireControls() {
+    var expand = document.getElementById("expandAll");
+    var collapse = document.getElementById("collapseAll");
+    var theme = document.getElementById("themeToggle");
+    var print = document.getElementById("printBtn");
+    var search = document.getElementById("docSearch");
+
+    if (expand) expand.addEventListener("click", function () { allDetails().forEach(function (d) { d.open = true; }); });
+    if (collapse) collapse.addEventListener("click", function () {
+      document.querySelectorAll("main .doc-section > details").forEach(function (d) { d.open = false; });
+      document.querySelectorAll("main details.sub").forEach(function (d) { d.open = false; });
+    });
+    if (theme) theme.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+    });
+    if (print) print.addEventListener("click", function () { window.print(); });
+    if (search) wireSearch(search);
+  }
+
+  function allDetails() { return Array.prototype.slice.call(document.querySelectorAll("main details")); }
+
+  /* ---- search / filter ---- */
+  function wireSearch(input) {
+    var countEl = document.querySelector(".search-count");
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    var tocLinks = Array.prototype.slice.call(document.querySelectorAll("#docToc a"));
+    var debounce;
+    input.addEventListener("input", function () {
+      clearTimeout(debounce);
+      debounce = setTimeout(run, 120);
+    });
+    input.addEventListener("keydown", function (e) { if (e.key === "Escape") { input.value = ""; run(); input.blur(); } });
+
+    function run() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      if (!q) {
+        sections.forEach(function (s) { s.classList.remove("filtered-out"); });
+        tocLinks.forEach(function (a) { a.classList.remove("filtered-out"); });
+        if (countEl) countEl.textContent = "";
+        return;
+      }
+      sections.forEach(function (s) {
+        var match = s.textContent.toLowerCase().indexOf(q) !== -1;
+        s.classList.toggle("filtered-out", !match);
+        if (match) {
+          shown++;
+          var det = s.querySelector(":scope > details");
+          if (det) det.open = true;
+        }
+        var link = document.querySelector('#docToc a[data-target="' + s.id + '"]');
+        if (link) link.classList.toggle("filtered-out", !match);
+      });
+      if (countEl) countEl.textContent = shown + (shown === 1 ? " match" : " matches");
+    }
+  }
+
+  /* ---- file references: click to copy path ---- */
+  function wireFileRefs() {
+    document.body.addEventListener("click", function (e) {
+      var ref = e.target.closest("code.fileref");
+      if (!ref) return;
+      var path = ref.getAttribute("data-path") || ref.textContent.trim();
+      copyText(path).then(function () {
+        var old = ref.textContent;
+        ref.classList.add("copied");
+        ref.textContent = "copied: " + path;
+        setTimeout(function () { ref.textContent = old; ref.classList.remove("copied"); }, 1100);
+      });
+    });
+  }
+
+  /* ---- code blocks: copy button ---- */
+  function wireCodeCopy() {
+    document.querySelectorAll("figure.code").forEach(function (fig) {
+      var pre = fig.querySelector("pre");
+      if (!pre) return;
+      var btn = document.createElement("button");
+      btn.className = "btn code-copy";
+      btn.innerHTML = '<span class="ico" style="-webkit-mask:var(--icon-copy) center/contain no-repeat;mask:var(--icon-copy) center/contain no-repeat"></span><span class="label">Copy</span>';
+      btn.addEventListener("click", function () {
+        copyText(pre.innerText).then(function () {
+          var l = btn.querySelector(".label");
+          if (l) { l.textContent = "Copied"; setTimeout(function () { l.textContent = "Copy"; }, 1100); }
+        });
+      });
+      fig.appendChild(btn);
+    });
+  }
+
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(fallback);
+    return fallback();
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (e) {}
+      return Promise.resolve();
+    }
+  }
+
+  /* ---- scroll progress ---- */
+  function wireScrollProgress() {
+    var bar = document.getElementById("scrollProgress");
+    if (!bar) return;
+    function upd() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + "%";
+    }
+    window.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    upd();
+  }
+
+  /* ---- back to top ---- */
+  function wireBackToTop() {
+    var b = document.getElementById("backTop");
+    if (!b) return;
+    b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+    window.addEventListener("scroll", function () {
+      b.classList.toggle("show", window.scrollY > 600);
+    }, { passive: true });
+  }
+
+  /* ---- scroll-spy ---- */
+  function wireScrollSpy() {
+    var links = {};
+    document.querySelectorAll("#docToc a").forEach(function (a) { links[a.dataset.target] = a; });
+    var targets = Array.prototype.slice.call(document.querySelectorAll("main .doc-section, main h3.anchor"));
+    if (!targets.length || !("IntersectionObserver" in window)) return;
+    var visible = new Set();
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) visible.add(en.target.id); else visible.delete(en.target.id);
+      });
+      var best = null, bestTop = Infinity;
+      visible.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var top = el.getBoundingClientRect().top;
+        if (top < bestTop) { bestTop = top; best = id; }
+      });
+      Object.keys(links).forEach(function (id) { links[id].classList.toggle("active", id === best); });
+    }, { rootMargin: "-70px 0px -65% 0px", threshold: 0 });
+    targets.forEach(function (t) { if (t.id) obs.observe(t); });
+  }
+
+  /* ---- print = expand all ---- */
+  function wirePrint() {
+    window.addEventListener("beforeprint", function () { allDetails().forEach(function (d) { d.open = true; }); });
+  }
+
+  /* ---- initial hash ---- */
+  function handleInitialHash() {
+    if (location.hash.length > 1) {
+      var id = decodeURIComponent(location.hash.slice(1));
+      setTimeout(function () { revealAndScroll(id); }, 60);
+    }
+  }
+
+  /* ---- mermaid (CDN, graceful fallback to source) ---- */
+  function initMermaid() {
+    var blocks = document.querySelectorAll(".mermaid");
+    if (!blocks.length) return;
+    // stash source for fallback
+    blocks.forEach(function (b) { if (!b.dataset.src) b.dataset.src = b.textContent; });
+    var theme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "default";
+    var s = document.createElement("script");
+    s.type = "module";
+    s.textContent =
+      'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";' +
+      'mermaid.initialize({ startOnLoad: false, theme: "' + theme + '", securityLevel: "loose", flowchart:{useMaxWidth:true}, themeVariables:{ fontFamily: "inherit" } });' +
+      'try { await mermaid.run({ querySelector: ".mermaid" }); }' +
+      'catch (e) { document.querySelectorAll(".mermaid").forEach(function(b){ var f=b.closest("figure.diagram"); if(f) f.classList.add("failed"); }); }';
+    s.onerror = mermaidFail;
+    document.body.appendChild(s);
+    // safety net: if CDN blocked, reveal fallbacks after a delay
+    setTimeout(function () {
+      document.querySelectorAll(".mermaid").forEach(function (b) {
+        if (!b.querySelector("svg")) { var f = b.closest("figure.diagram"); if (f) f.classList.add("failed"); }
+      });
+    }, 4000);
+  }
+  function mermaidFail() {
+    document.querySelectorAll("figure.diagram").forEach(function (f) { f.classList.add("failed"); });
+  }
+
+  function escapeHTML(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+})();
+
+  </script>
+</body>
+</html>

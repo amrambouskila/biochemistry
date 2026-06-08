@@ -1,5 +1,7 @@
 # AGENTS.md — AI Assistant Guidelines for Biochemistry
 
+<mandatory_workflow>
+
 > **MANDATORY WORKFLOW: READ THIS ENTIRE FILE BEFORE EVERY CHANGE.** Every time. No skimming, no assuming prior-session context carries over — it does not.
 >
 > **Why:** This project spans multiple sessions and months of development across 8 phases. Skipping the re-read produces decisions that contradict the architecture, duplicate existing patterns, break cross-scale data contracts, or introduce tech debt that compounds across scales (an unvalidated force field breaks every cellular simulation on top of it).
@@ -13,19 +15,31 @@
 > 6. Read the source files you plan to modify — understand existing patterns first.
 > 7. Then implement, following the rules and contracts defined here.
 
+</mandatory_workflow>
+
 ---
+
+<project_identity>
 
 ## Project Identity
 
 **Biochemistry** (Multi-scale Molecular & Anatomical Chemistry Simulator) is a multi-phase project to build a 3D biological simulation platform spanning atoms to organisms. The README.md contains the full roadmap with 8 phases. This file provides guidelines for any AI assistant (Claude or otherwise) helping build this project.
 
+</project_identity>
+
 ---
+
+<critical_context>
 
 ## Critical Context
 
 This project simulates reality at multiple scales. Every decision — data model, algorithm, rendering approach — must be evaluated through the lens of **"will this still work when we scale up to the next phase?"** A molecule renderer that can't handle 10,000 atoms is useless by Phase 3. A cell model that requires 10 minutes per simulated second is useless by Phase 5. Performance and scalability are not afterthoughts — they are core requirements from day one.
 
+</critical_context>
+
 ---
+
+<tech_stack>
 
 ## Technology Stack (Non-Negotiable)
 
@@ -55,7 +69,11 @@ This project simulates reality at multiple scales. Every decision — data model
 
 **Do not introduce alternative technologies without explicit approval.** No Flask, no Django, no Vue, no Angular, no Babylon.js, no Pandas for computation (Pandas is OK for data loading only, never for simulation math).
 
+</tech_stack>
+
 ---
+
+<architecture>
 
 ## Architecture Principles
 
@@ -98,7 +116,11 @@ Physical constants, element properties, force field parameters, enzyme kinetics,
 
 The only hard-coded numbers should be universal physical constants (speed of light, Boltzmann constant, Avogadro's number, etc.), and even these should be in a `constants.py` module, not scattered through the code.
 
+</architecture>
+
 ---
+
+<coding_standards>
 
 ## Coding Standards
 
@@ -188,7 +210,11 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 - Decode binary payloads (MessagePack) in a Web Worker to avoid blocking the main thread.
 - Implement a frame buffer: accumulate incoming simulation frames and interpolate between them for smooth rendering even if the backend sends frames at irregular intervals.
 
+</coding_standards>
+
 ---
+
+<phase_constraints>
 
 ## Phase-Specific Implementation Notes
 
@@ -238,7 +264,11 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 - The organism definition YAML schema should be designed carefully — it's the core data model of Phase 8. Use JSON Schema for validation.
 - For the substance database, prioritize depth over breadth. It's better to have 100 well-parameterized substances (complete ADME + pharmacodynamics) than 10,000 with only molecular weight and LogP.
 
+</phase_constraints>
+
 ---
+
+<pitfalls>
 
 ## Common Pitfalls to Avoid
 
@@ -256,7 +286,11 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 
 7. **Monolithic architecture**: Each phase's backend should be an independent module that can be imported and used standalone. Don't create a god class that does everything. The PBPK engine should work without the MD engine, and vice versa.
 
+</pitfalls>
+
 ---
+
+<definition_of_done>
 
 ## Definition of Done (Per Phase)
 
@@ -270,7 +304,11 @@ A phase is complete when:
 6. The zoom transition from this phase to the previous phase's detail level works seamlessly.
 7. At least one validation test compares simulation output against published experimental or reference data.
 
+</definition_of_done>
+
 ---
+
+<usage_guide>
 
 ## How to Ask Claude (or Any AI) for Help on This Project
 
@@ -282,10 +320,20 @@ When working on a specific task, provide:
 4. **What specific thing** you're trying to build or fix.
 5. **What you've tried** that didn't work (if applicable).
 
+<good_example>
+
 Example good prompt:
 > "I'm working on Phase 2, backend force field engine. I have the bond stretching and angle bending terms working (in `src/simulation/molecular/force_field.py`). I need to implement the Lennard-Jones non-bonded interaction term. My molecule has 500 atoms and I need it to run at > 1000 steps/second on CPU. How should I implement the neighbor list for efficient pairwise distance calculation?"
+
+</good_example>
+
+<bad_example>
 
 Example bad prompt:
 > "Help me build the molecular simulator."
 
+</bad_example>
+
 The more context you provide, the more useful the assistance will be.
+
+</usage_guide>

@@ -68,9 +68,9 @@ echo   Biochemistry — Starting Services
 echo ============================================
 echo.
 echo   Services:
-echo     - PostgreSQL  (port 5432)
-echo     - Redis       (port 6379)
-echo     - Backend     (port 8000)
+echo     - PostgreSQL  (port 5522)
+echo     - Redis       (port 6522)
+echo     - Backend     (port 8222)
 echo     - Frontend    (port 5175)
 echo.
 goto :eof
@@ -85,8 +85,8 @@ echo ============================================
 echo   Services are running!
 echo.
 echo   Frontend:  http://localhost:5175
-echo   Backend:   http://localhost:8000
-echo   API Docs:  http://localhost:8000/docs
+echo   Backend:   http://localhost:8222
+echo   API Docs:  http://localhost:8222/docs
 echo ============================================
 goto :eof
 
