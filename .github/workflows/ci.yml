@@ -34,6 +34,10 @@ jobs:
   backend-test:
     name: backend / test + coverage gate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     defaults:
       run:
         working-directory: backend
@@ -43,7 +47,14 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --extra dev
-      - run: uv run pytest
+      - run: uv run pytest --junitxml=junit-backend.xml
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: backend tests
+          path: backend/junit-backend.xml
+          reporter: java-junit
 
   backend-build:
     name: backend / build
@@ -95,6 +106,10 @@ jobs:
   frontend-test:
     name: frontend / test + coverage gate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     defaults:
       run:
         working-directory: frontend
@@ -109,7 +124,14 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:coverage
+      - run: pnpm test:coverage -- --reporter=default --reporter=junit --outputFile.junit=junit-frontend.xml
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: frontend tests
+          path: frontend/junit-frontend.xml
+          reporter: java-junit
 
   frontend-build:
     name: frontend / build
