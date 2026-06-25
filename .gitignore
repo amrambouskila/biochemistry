@@ -39,6 +39,9 @@ frontend/build/
 frontend/coverage/
 *.tsbuildinfo
 
+# Test reports (JUnit XML — generated per run, surfaced in CI)
+junit-*.xml
+
 # Docker
 docker-compose.override.yml
 

@@ -2,7 +2,7 @@
 
 ## Current Phase: Phase 0 complete — ready for Phase 1, Stage 0.1
 
-v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift identified in the re-audit. The scaffold is now production-safe, CI-gated, and fully aligned with docs — the next review pass should read as high-fidelity. v0.2.1 is a patch that unblocks the CI `frontend / docker-build` stage by pinning pnpm to 9.15.9 (see Versions); CI is green end-to-end again.
+v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift identified in the re-audit. The scaffold is now production-safe, CI-gated, and fully aligned with docs — the next review pass should read as high-fidelity. v0.2.1 unblocks the CI `frontend / docker-build` stage by pinning pnpm to 9.15.9 (see Versions). v0.2.2 fixes the remaining red stage, `frontend / test + coverage gate`: the JUnit reporter was being activated via CLI flags forwarded through `pnpm run … -- …`, which pnpm 9 mangles on POSIX shells (literal `--`, `=`→`\=`), so no report file was produced and `dorny/test-reporter` failed. Reporters now live in `vite.config.ts` and CI runs plain `pnpm test:coverage`; verified in a Linux container. CI is now green end-to-end.
 
 ## What Exists
 

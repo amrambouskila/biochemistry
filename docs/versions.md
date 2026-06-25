@@ -1,5 +1,14 @@
 # Versions — Biochemistry
 
+## v0.2.2 — Frontend test-report (JUnit) fix
+
+Patch bump (bug fix: the CI `frontend / test + coverage gate` stage was failing — `dorny/test-reporter` reported "No test report files were found").
+
+- **Root cause**: the JUnit reporter was activated via CLI flags forwarded through a pnpm script — `pnpm test:coverage -- --reporter=default --reporter=junit --outputFile.junit=junit-frontend.xml`. On POSIX shells, pnpm 9.15.9's `pnpm run <script> -- <args>` forwarding (a) passes a **literal `--`** to vitest and (b) **escapes every `=` to `\=`**, so vitest received `--reporter\=junit` / `--outputFile.junit\=junit-frontend.xml`. cac never parsed those, the junit reporter never activated, and no report file was written — yet the tests still passed, so the step exited 0 and the failure only surfaced at the downstream reporter step. Windows/PowerShell forwards the same args cleanly, which is why local runs masked it. The backend test job was unaffected because `pytest --junitxml=...` is a direct CLI arg with no pnpm indirection. Verified by reproducing the exact CI command in a `node:20` Linux container (junit reporter silently absent → no file).
+- **`frontend/vite.config.ts`**: moved both reporters into `test.reporters: ['default', 'junit']` and added `test.outputFile: { junit: 'junit-frontend.xml' }`. Configuring reporters in-config (not via forwarded CLI flags) is deterministic across shells/OSes, keeps the human-readable console output (`default`), and still emits the JUnit XML — satisfying global-CLAUDE §5's "never junit-only" rule.
+- **`.github/workflows/ci.yml`**: the frontend test step is now plain `pnpm test:coverage` (no `-- <args>` forwarding). `dorny/test-reporter`'s `path: frontend/junit-frontend.xml` is unchanged and now resolves.
+- **`.gitignore`**: added `junit-*.xml` — the report is now written on every local run too, and is a generated artifact (covers both `junit-frontend.xml` and the backend's `junit-backend.xml`).
+
 ## v0.2.1 — Frontend Docker build fix (pnpm pin)
 
 Patch bump (bug fix: the CI `frontend / docker-build` stage was failing).

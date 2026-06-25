@@ -124,7 +124,9 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:coverage -- --reporter=default --reporter=junit --outputFile.junit=junit-frontend.xml
+      # Reporters + outputFile are configured in vite.config.ts, not passed as
+      # CLI flags: pnpm's `-- <args>` forwarding mangles `=` on POSIX shells.
+      - run: pnpm test:coverage
       - name: Publish test report
         uses: dorny/test-reporter@v1
         if: ${{ !cancelled() }}
