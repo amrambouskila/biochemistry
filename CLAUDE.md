@@ -127,7 +127,7 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 ### Python (Backend)
 
 **Style:**
-- Follow PEP 8. Use `ruff` for linting and formatting.
+- Follow PEP 8. Use `ruff` for linting and formatting. Lint select is `["E", "F", "I", "N", "UP", "ANN", "S"]` (`S` = flake8-bandit, see `<security>`).
 - Maximum line length: 120 characters.
 - Use type hints everywhere. All function signatures must have full type annotations.
 - Use `from __future__ import annotations` in every module.
@@ -211,6 +211,65 @@ The only hard-coded numbers should be universal physical constants (speed of lig
 - Implement a frame buffer: accumulate incoming simulation frames and interpolate between them for smooth rendering even if the backend sends frames at irregular intervals.
 
 </coding_standards>
+
+---
+
+<security>
+
+## Security — SAST Scanning & Injection Safety (Non-Negotiable)
+
+Applies global CLAUDE.md section 19 to this repo. Security is part of the Definition of Done for every task and every phase — not a post-MVP stage.
+
+### SAST scanning
+
+`.github/workflows/ci.yml` MUST have a `sast` stage between `lint` and `test`. The stage fails on any HIGH/CRITICAL finding. MEDIUM findings are triaged — fixed, or suppressed inline with a written justification. `continue-on-error: true` on a sast job is non-compliant.
+
+**Wired.** `backend-sast` (`needs: [backend-lint]`) and `frontend-sast` (`needs: [frontend-lint]`) exist; `backend-test` carries `needs: [backend-sast]` and `frontend-test` carries `needs: [frontend-sast]`, so a security finding blocks the test → build → docker-build chain on that side. This project is public and uses GitHub Actions; the wiring is:
+
+- **Semgrep** — wired: `pipx run semgrep scan --config auto --config p/owasp-top-ten …` scoped per side (`--include backend` in `backend-sast`, `--include frontend` in `frontend-sast`, `--severity ERROR --error`); SARIF uploaded via `github/codeql-action/upload-sarif` under distinct categories (job permission `security-events: write`) so findings land in Security → Code scanning. A `.semgrep/` project-rules directory does not exist yet — create it with the first repo-specific rule.
+- **CodeQL** — wired: `github/codeql-action` init → analyze for `python` (in `backend-sast`, category `codeql-python`) and `javascript-typescript` (in `frontend-sast`, category `codeql-frontend`).
+- **Python lint (ruff `S`)** — wired: `backend/pyproject.toml` `[tool.ruff.lint] select = ["E", "F", "I", "N", "UP", "ANN", "S"]` with `[tool.ruff.lint.per-file-ignores] "tests/**" = ["S101"]` and nothing else excluded; `uv run ruff check .` is clean with no suppressions. Catches `shell=True`, `eval`/`exec`, `pickle`, `yaml.load`, hard-coded secrets, and SQL string formatting (`S608`) in the `lint` stage.
+- **TypeScript lint** — wired: `frontend/eslint.config.js` extends `security.configs.recommended` + `noUnsanitized.configs.recommended`, so `eval`, `new Function`, unsafe regex, and raw `innerHTML`/`outerHTML`/`insertAdjacentHTML` fail `lint` (clean today). The `dangerouslySetInnerHTML` ban is enforced by review — `no-unsanitized` covers the DOM sinks, not the React prop.
+  > **Severity caveat (verified against the installed plugin):** every rule in `eslint-plugin-security`'s `recommended` config is `warn`, and this project's `lint` script is a bare `eslint .` with no `--max-warnings 0` — so those rules are *reported but cannot fail the build*. Only `eslint-plugin-no-unsanitized` (severity `error`, covering `innerHTML` / `outerHTML` / `insertAdjacentHTML` / `document.write`) actually gates today. Neither plugin covers `new Function` or the React `dangerouslySetInnerHTML` prop. To make the security rules gate, set them to `error` explicitly (and expect to triage `security/detect-object-injection`, which is noisy).
+- **Dependency audit** — wired: `uv run --with pip-audit pip-audit` in `backend-sast`, `pnpm audit --audit-level=high` in `frontend-sast`. Vulnerable transitives fail the pipeline.
+- **Secret scanning** — wired: `gitleaks/gitleaks-action@v2` in `backend-sast` on a `fetch-depth: 0` checkout (`gitleaks detect --no-git --redact` locally).
+- **Container scanning** — wired: `aquasecurity/trivy-action@0.28.0` (`severity: HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`) against `biochemistry-backend:ci` and `biochemistry-frontend:ci` inside the existing `docker-build` jobs, which now build with `load: true` so the images are scannable.
+
+**Local parity** (run before any commit; `/pre-commit` reports it in its verdict table):
+```bash
+cd backend  && uv run ruff check . && semgrep scan --config auto --error . && uv run pip-audit
+cd frontend && pnpm lint && semgrep scan --config auto --error . && pnpm audit --audit-level=high
+gitleaks detect --no-git --redact        # from repo root
+```
+
+### Injection safety — input boundary inventory
+
+Everything crossing the process boundary is hostile until it passes a Pydantic model (backend) or a TypeScript type guard (frontend). Boundaries that exist today are marked **(live)**; the rest are planned in `docs/MASTER_PLAN.md` and inherit these rules the moment they are created. A new boundary not in this table is not mergeable until the table is updated.
+
+| Boundary | Injection classes | Required defense in this codebase |
+|---|---|---|
+| `GET /health` **(live)** — `backend/src/main.py` | none (no input) | Keep it input-free. Never echo env/config values. |
+| Env vars **(live)** — `DATABASE_URL`, `REDIS_URL` (`docker-compose.yml`), later `BACKEND_URL` | auth/secrets | Read via a Pydantic `BaseSettings` class only; never logged; never interpolated into a shell string. Real values live in `.env` (write-blocked by the `PreToolUse` hook). |
+| nginx reverse proxy **(live)** — `frontend/nginx.conf` `/api/`, `/ws/` | header injection, XSS, resource exhaustion | Add `Content-Security-Policy` (`default-src 'self'`; `connect-src 'self'` plus the backend `ws:`/`wss:` origin; no `unsafe-inline` scripts; `worker-src 'self' blob:` for the MessagePack Web Worker), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `client_max_body_size` sized for the largest accepted PDB upload. |
+| REST element/atom endpoints — `backend/src/api/elements.py`, `atoms.py` (`GET /api/v1/elements`, `/elements/{symbol}`, `POST /api/v1/atoms/*`) | SQL, resource exhaustion | SQLAlchemy 2.0 ORM/Core with bound params only; `text()` only with `:named` binds, never f-string/`%`/`.format()`. Filter/sort column names come from an allowlist map, never from the query string. Pagination cap on list endpoints. Orbital `grid_size` bounded by a Pydantic `Field(le=...)` so one request cannot allocate an unbounded voxel grid. |
+| `POST /api/v1/molecules/from-smiles` — `backend/src/api/molecules.py` | resource exhaustion, command | SMILES length-capped by Pydantic; parsed only via `rdkit.Chem.MolFromSmiles` (no shell-out to external chemistry binaries); RDKit returning `None` is a 422, never a leaked exception. Conformer generation runs with a bounded atom count and a timeout. |
+| `POST /api/v1/molecules/from-pdb`, `POST /api/v1/coarse-grain/from-pdb` (file uploads) | path traversal, resource exhaustion, unsafe deserialization | Upload size limit at uvicorn and nginx; the client-supplied filename is discarded and replaced with a generated UUID; any on-disk write is `Path(base, name).resolve()` + `is_relative_to(base.resolve())`. PDB parsed by RDKit from bytes, never via `exec`/`pickle`. |
+| WebSocket `/ws/simulation`, `/ws/simulation/cg` — `backend/src/api/simulation.py`, `organelle.py` | unsafe deserialization, resource exhaustion | Inbound frames decoded with `msgpack.unpackb(raw=False, max_buffer_size=...)` then `WSMessage.model_validate`; unknown `type` values rejected; per-connection frame-rate and step-count caps; simulation parameters (`dt`, step count, atom count) bounded by Pydantic. Outbound payloads are typed arrays, never user strings reflected back. |
+| Parameter / definition file loaders — UFF/MARTINI/AMBER force fields, SBML pathways (BioModels), organism YAML (Phase 8), GLTF organ meshes (Phase 6) | unsafe deserialization, path traversal, resource exhaustion | `yaml.safe_load` only (JSON Schema-validated per MASTER_PLAN Task 8.1.1); SBML parsed with entity expansion disabled (XXE); file paths restricted to `backend/data/` via the resolve/`is_relative_to` check; GLTF loaded by the frontend only from same-origin `/assets/`. |
+| Orbital cache — `backend/cache/orbitals/*.npy`, Redis | unsafe deserialization, path traversal | `np.load(..., allow_pickle=False)`; cache keys built from validated ints `(n, l, ml)`, never from raw request strings; Redis values are msgpack/bytes, never pickled objects. |
+| Seed / ETL pulls — `mendeleev`, PubChem, DrugBank, EPA CompTox, KEGG (Phase 1, 7–8) | SSRF, unsafe deserialization | Outbound `httpx` only to a constant host allowlist; redirects disabled; responses validated into Pydantic models before any DB insert; seeds run as scripts, never triggered by an HTTP request parameter. |
+| Frontend rendering — React + R3F, Chart.js dashboards, narration/tooltip text (Phase 7–8) | XSS | No `dangerouslySetInnerHTML` (ESLint-banned). Any Markdown/narration text from outside the bundle passes through DOMPurify. Backend responses typed at the boundary; element names/symbols rendered as text nodes. |
+| Web Worker MessagePack decoder — `frontend/src/workers/` | unsafe deserialization, resource exhaustion | Decode with size limits; validate frame shape (`Float32Array` length = `3 * atomCount`) before handing to the store; drop malformed frames. |
+
+### Project-specific additions
+
+- **RDKit / Numba / SciPy are native code.** Malformed SMILES, PDB, or SBML can crash or hang the C++ layer. Every parse of external structure data runs under an input size cap and a wall-clock timeout, and a parse failure is a 422 response, never an unhandled 500 that leaks a traceback.
+- **No Python-level `eval` for formula/expression input.** Scenario builder (Phase 7) and organism YAML (Phase 8) express parameters as data validated by Pydantic/JSON Schema, never as evaluable expressions.
+- **No LLM calls or agent tool execution exist in this project.** If a narration/tutorial feature later calls a model, the prompt-injection rules of global section 19 apply and this table gains a row first.
+
+The task-completion self-audit for this project includes a **Security check**: local SAST clean; every touched input boundary names its injection class(es) and defense; this `<security>` section updated if a boundary was added.
+
+</security>
 
 ---
 
@@ -303,6 +362,9 @@ A phase is complete when:
 5. Performance benchmarks are recorded (simulation speed, rendering FPS).
 6. The zoom transition from this phase to the previous phase's detail level works seamlessly.
 7. At least one validation test compares simulation output against published experimental or reference data.
+8. SAST stage green with zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+9. All input boundaries added or touched in the phase are injection-safe and documented in the `<security>` section.
+10. Security check passed in the task-completion self-audit (local SAST clean; touched boundaries name their injection classes and defenses).
 
 </definition_of_done>
 

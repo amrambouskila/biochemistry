@@ -18,6 +18,24 @@ v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift
   - `docs/MASTER_PLAN.md` — Mermaid system architecture, phase Gantt, module dependency graph.
   - `CLAUDE.md` (project) — mandatory re-read block at top, workflow pointing at MASTER_PLAN / status / versions / frontend-protocol. Charting guidance aligned with global §5 (Chart.js, not recharts/nivo).
 
+## Security
+
+Requirements are documented **and wired**. `CLAUDE.md` `<security>` (mirrored in `AGENTS.md`) specifies the mandatory `sast` CI stage, the input-boundary inventory (live today: `GET /health`, `DATABASE_URL`/`REDIS_URL` env vars, nginx `/api/` + `/ws/` proxy), and the per-boundary injection defenses; `docs/MASTER_PLAN.md` carries the SAST + input-boundary gate lines on every phase gate and a Security section with the pipeline diagram; `.codex/commands/pre-commit.md` has a SAST check and verdict row.
+
+Wired (MASTER_PLAN Task 0.1.5):
+
+- `.github/workflows/ci.yml` has `backend-sast` (`needs: [backend-lint]`) and `frontend-sast` (`needs: [frontend-lint]`): CodeQL (`python` / `javascript-typescript`), `pipx run semgrep scan` with per-side `--include` and SARIF upload, `gitleaks/gitleaks-action@v2` (backend job, full-depth checkout), `uv run --with pip-audit pip-audit`, `pnpm audit --audit-level=high`. `backend-test` and `frontend-test` carry `needs:` on their sast job.
+- Both `docker-build` jobs build with `load: true` and run `aquasecurity/trivy-action@0.28.0` (`HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`) against `biochemistry-backend:ci` / `biochemistry-frontend:ci`.
+- `backend/pyproject.toml` lint select is `["E", "F", "I", "N", "UP", "ANN", "S"]` with `"tests/**" = ["S101"]`; ruff is clean with no suppressions.
+- `frontend/eslint.config.js` extends `security.configs.recommended` + `noUnsanitized.configs.recommended`; lint is clean.
+- `frontend/nginx.conf` sends CSP (`connect-src 'self' ws: wss:` for the proxied API/WebSocket; `style-src 'unsafe-inline'` for R3F/Chart.js inline styles), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `client_max_body_size 25m` (sized for PDB uploads).
+- `frontend/package.json` has a `sast` script for local parity.
+
+Still pending:
+
+- `.semgrep/` project-rules directory.
+- Pydantic `BaseSettings` class for env vars (currently read ad hoc).
+
 ## Known Gaps (not in v0.2.0 scope)
 
 - `backend/src/` subdirectories (`api/`, `models/`, `simulation/`, `data/`) are intentionally empty — Phase 1 fills them.

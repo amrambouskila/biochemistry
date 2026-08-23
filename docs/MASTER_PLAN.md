@@ -190,6 +190,14 @@ This is not a phase — it's the one-time project scaffolding that must exist be
 - The database session should use async SQLAlchemy with `asyncpg`
 - FastAPI dependency injection for database sessions per CLAUDE.md
 
+**Task 0.1.5: CI pipeline with `sast` stage**
+- What: GitHub Actions pipeline `lint → sast → test (coverage gate) → build → docker-build` for both backend and frontend. Wire the `sast` stage (Semgrep `semgrep scan` + SARIF upload, CodeQL, `uv run pip-audit`, `pnpm audit --audit-level=high`, gitleaks; Trivy `HIGH,CRITICAL` `exit-code: 1` in `docker-build`). Add ruff `S` rules to `backend/pyproject.toml` and `eslint-plugin-security` + `eslint-plugin-no-unsanitized` to `frontend/eslint.config.js`
+- Where: `.github/workflows/ci.yml`, `.semgrep/` (project rules), `backend/pyproject.toml`, `frontend/eslint.config.js`
+- The `sast` stage fails on HIGH/CRITICAL; `continue-on-error` is not permitted on it
+- Depends on: Tasks 0.1.1, 0.1.2, 0.1.3
+- Validates against: pipeline green on an empty tree; a deliberate `subprocess.run(cmd, shell=True)` in a scratch branch fails `lint` (S602) and `sast`
+- Scalability check: every later phase adds endpoints, uploads, and parsers — the scanner set is in place before the first input boundary exists (see Security section under Cross-Phase Concerns)
+
 **[GATE 0.1]**: The following must all be true before starting Phase 1:
 - `uv sync` installs all Python deps without errors
 - `pnpm install` installs all frontend deps without errors
@@ -198,7 +206,9 @@ This is not a phase — it's the one-time project scaffolding that must exist be
 - The frontend renders a blank React app at localhost:5175
 - The backend responds to `GET /health` at localhost:8222
 - PostgreSQL accepts connections and Alembic can run migrations
-- `ruff check backend/src/` passes with no errors
+- `ruff check backend/src/` passes with no errors (including `S` rules)
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>` (at this stage: `GET /health`, env vars, nginx proxy)
 
 ---
 
@@ -474,6 +484,8 @@ This is not a phase — it's the one-time project scaffolding that must exist be
 5. Performance benchmarks recorded (Task 1.4.2)
 6. Zoom transition: not applicable for Phase 1 (no previous phase to transition from)
 7. Reference validation passes (Task 1.4.3)
+8. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+9. New input boundaries in this phase (`/api/v1/elements`, `/api/v1/atoms/*`, orbital `.npy` cache, `mendeleev` seed) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -814,6 +826,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 5. Performance benchmarks recorded
 6. Zoom from molecule to atom works (Phase 1 ↔ Phase 2 transition)
 7. Force field validated against published bond lengths, angles, and energy conservation
+8. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+9. New input boundaries in this phase (`/api/v1/molecules/*`, PDB upload, `/ws/simulation`, force field parameter files, Web Worker decoder) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1053,7 +1067,9 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - What: Zooming out from a molecule to show it in the context of an organelle
 - Crossfade from all-atom detail to CG representation to organelle mesh
 
-**[GATE 3.6 — PHASE 3 COMPLETE]**: All 7 Definition of Done criteria met
+**[GATE 3.6 — PHASE 3 COMPLETE]**: All Definition of Done criteria met:
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (`/api/v1/coarse-grain/from-pdb`, `/api/v1/membrane/generate`, `/ws/simulation/cg`, MARTINI parameter files, SBML pathway files) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1156,6 +1172,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - Pause / rewind / fast-forward controls
 
 **[GATE 4.2 — PHASE 4 COMPLETE]**: All Definition of Done criteria met. Seamless zoom from cell → organelle → molecule → atom works.
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (substance-introduction endpoints, SBML/BioModels imports, cell dashboard data) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1232,6 +1250,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - Growth rate
 
 **[GATE 5.2 — PHASE 5 COMPLETE]**: All Definition of Done criteria met. Click any cell to zoom into its Phase 4 cellular view.
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (tissue/ABM configuration endpoints, vessel-tree definition files) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1268,6 +1288,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - "Zoom into tissue" button transitions to Phase 5 tissue view for a selected region
 
 **[GATE 6 — PHASE 6 COMPLETE]**: All Definition of Done criteria met. Zoom from organ → tissue → cell → molecule → atom works seamlessly.
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (GLTF organ mesh loading, organ physiology parameter files) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1352,6 +1374,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - This integrates ALL previous phase renderers
 
 **[GATE 7 — PHASE 7 COMPLETE]**: Cigarette simulation runs end-to-end. Seamless zoom from whole body to individual atoms. PBPK predictions validated against published human data for CO, nicotine, benzene.
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (substance database seeds from PubChem/DrugBank/CompTox/KEGG, scenario builder parameters, narration text) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1402,6 +1426,8 @@ This is the most critical code in the entire project. Every subsequent phase dep
 - Tooltips, guided tutorials, quiz mode, difficulty levels
 
 **[GATE 8 — PHASE 8 COMPLETE]**: Any substance can be simulated in any defined organism. Cross-species validation passes (drug metabolism in human vs mouse vs rat matches published data). Narrative mode works.
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification
+- New input boundaries in this phase (organism YAML definitions, tutorial/quiz content) are injection-safe and documented in `CLAUDE.md` `<security>`
 
 ---
 
@@ -1443,6 +1469,34 @@ Every phase must have:
 3. **Validation tests**: simulation output compared against published experimental data
 4. **Performance benchmarks**: recorded and tracked for regressions
 5. **Visual tests**: rendered output is correct (manual initially, screenshot regression later)
+
+### Security
+
+**SAST is a mandatory pipeline stage from the first pipeline commit (Task 0.1.5) through every phase.** `.github/workflows/ci.yml` runs `lint → sast → test → build → docker-build`; the `sast` stage fails on any HIGH/CRITICAL finding and never carries `continue-on-error`. Every phase gate above carries the SAST line. The full contract is global CLAUDE.md section 19; the project-specific application is `CLAUDE.md` `<security>`.
+
+```mermaid
+flowchart LR
+    lint["lint<br/>ruff (E F I N UP ANN S) / ESLint + security plugins"] --> sast["sast<br/>Semgrep + CodeQL<br/>pip-audit / pnpm audit<br/>gitleaks"]
+    sast --> test["test + coverage gate"]
+    test --> build["build"]
+    test --> docker["docker-build<br/>+ Trivy HIGH/CRITICAL"]
+```
+
+Tool set: Semgrep (`p/default`, `p/owasp-top-ten`, `p/python`, `p/typescript`, `p/react`, `p/docker`, SARIF → GitHub Code scanning), CodeQL (`python`, `javascript-typescript`), ruff `S` rules, `eslint-plugin-security` + `eslint-plugin-no-unsanitized`, `pip-audit`, `pnpm audit --audit-level=high`, gitleaks, Trivy.
+
+Injection-safety principles by component (boundary-by-boundary table with the exact defenses lives in `CLAUDE.md` `<security>`; do not duplicate it here):
+
+| Component | Untrusted input | Principle |
+|-----------|-----------------|-----------|
+| REST API (`backend/src/api/`) | query strings, JSON bodies, SMILES | Pydantic at the edge with size/range bounds; SQLAlchemy bound params only; allowlisted filter/sort columns; paginated lists |
+| File uploads (`from-pdb`) | file bytes + filename | size-capped, filename replaced by UUID, `resolve()` + `is_relative_to()` before any disk write, RDKit parses bytes |
+| WebSocket (`/ws/simulation*`) | MessagePack frames | `unpackb(raw=False, max_buffer_size)` → `WSMessage.model_validate`; per-connection rate and step caps |
+| Parameter/definition loaders | UFF/MARTINI/AMBER, SBML, YAML, GLTF | `yaml.safe_load` + JSON Schema; XXE disabled; paths confined to `backend/data/`; `np.load(allow_pickle=False)` |
+| Seed/ETL scripts | mendeleev, PubChem, DrugBank, CompTox, KEGG | `httpx` with constant host allowlist, no redirects, Pydantic-validated before insert; never request-triggered |
+| Frontend (React/R3F, Chart.js, narration) | backend responses, narration/tutorial text | no `dangerouslySetInnerHTML`; DOMPurify for any external rich text; CSP + `nosniff` + `X-Frame-Options: DENY` in `nginx.conf`; Web Worker validates frame shape before storing |
+| Native libraries (RDKit, Numba, SciPy) | any parsed structure | input caps + wall-clock timeouts; parse failure is a 422, never a traceback |
+
+No LLM or agent tooling exists in this project; if one is added, a prompt-injection row is added to `CLAUDE.md` `<security>` before the feature lands.
 
 ### Error Compounding
 

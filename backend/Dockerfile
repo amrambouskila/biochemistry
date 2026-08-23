@@ -1,5 +1,12 @@
 FROM python:3.11-slim
 
+# Base-image security patches. The Debian slim bases currently ship a util-linux that Trivy
+# flags HIGH (CVE-2026-53612..53615, fixed upstream in 2.41.5). These packages come from the
+# base layer, so this is required even though nothing below installs them.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Install system dependencies for RDKit and scientific packages
