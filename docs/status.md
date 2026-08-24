@@ -20,6 +20,15 @@ v0.2.0 closes all Phase-0 audit findings plus the broader global-CLAUDE.md drift
 
 ## Security
 
+### Verified state (2026-08-24)
+
+- **Semgrep: clean.** Verified locally by running this repo's own CI command against the working tree (0 findings). The invocation itself was broken before today — `semgrep ci` rejects `--severity`/`--error` and exited 2 without scanning.
+- **Dependency audit: clean.** Verified with the repo's own audit command and threshold, after the override/upgrade remediation; install and build re-verified in the CI image.
+- **Container scan: base-image CVEs patched** via an `apt-get upgrade` layer, with the two unremediable pip-vendored findings carried in `.trivyignore` with justification.
+- **Security headers verified delivered** — confirmed by serving the config in `nginx:alpine` and inspecting the response for `/` (0 headers before the fix, 4 after).
+
+- Not run locally: gitleaks and Trivy are not part of any project toolchain here; both were exercised through their official images during verification, and CI runs them on every pipeline.
+
 Requirements are documented **and wired**. `CLAUDE.md` `<security>` (mirrored in `AGENTS.md`) specifies the mandatory `sast` CI stage, the input-boundary inventory (live today: `GET /health`, `DATABASE_URL`/`REDIS_URL` env vars, nginx `/api/` + `/ws/` proxy), and the per-boundary injection defenses; `docs/MASTER_PLAN.md` carries the SAST + input-boundary gate lines on every phase gate and a Security section with the pipeline diagram; `.codex/commands/pre-commit.md` has a SAST check and verdict row.
 
 Wired (MASTER_PLAN Task 0.1.5):
