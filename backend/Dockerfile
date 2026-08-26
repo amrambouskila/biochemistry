@@ -31,4 +31,8 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=5 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"
 
 # Run FastAPI with uvicorn (prod mode; dev hot-reload is layered in via docker-compose.dev.yml)
+# Local-dev container, not a public-facing service, so non-root is exempt per global
+# CLAUDE.md section 9. A non-root USER would also break the bind-mounted host directories this
+# image reads and writes at runtime. Revisit before any deployment beyond localhost.
+# nosemgrep: dockerfile.security.missing-user.missing-user
 CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
