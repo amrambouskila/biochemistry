@@ -7,6 +7,12 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
 
+# The base image's bundled setuptools 79.0.1 vendors jaraco.context 5.3.0 (CVE-2026-23949,
+# fixed in 6.1.0) and wheel 0.45.1 (CVE-2026-24049, fixed in 0.46.2), both flagged HIGH by
+# Trivy. They live under setuptools/_vendor/, so replacing setuptools is the only remediation:
+# setuptools 84.0.0 vendors jaraco.context 6.1.0 and wheel 0.46.3.
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 WORKDIR /app
 
 # Install system dependencies for RDKit and scientific packages
@@ -17,9 +23,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install uv for fast Python package management
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy dependency file and install
-COPY pyproject.toml .
-RUN uv sync --no-dev --no-install-project 2>/dev/null || echo "No dependencies to install yet"
+# Copy the dependency manifest AND the lockfile, then install exactly what the lock pins.
+# --frozen is what keeps the image's dependency set identical to the one pip-audit gates in CI;
+# resolving from pyproject.toml alone lets the image drift away from the audited set, and the
+# discarded-stderr form this replaced turned a failed install into a silently green build.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy application source
 COPY src/ ./src/

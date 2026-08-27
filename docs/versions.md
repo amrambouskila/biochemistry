@@ -2,6 +2,71 @@
 
 ## v0.2.2 — Frontend test-report (JUnit) fix
 
+### CI red-stage fixes: `backend / sast` and `frontend / docker-build` (2026-08-27)
+
+Run `33009850858` failed on exactly two jobs. Both are fixed, and every stage the two failures were
+blocking has now been reproduced locally end to end.
+
+- **`frontend / docker-build` died at "Set up job"** — `Unable to resolve action
+  aquasecurity/trivy-action@0.28.0, unable to find version 0.28.0`. The tag does not exist. On
+  2026-03-19 a threat actor force-pushed 76 of 77 tags in `aquasecurity/trivy-action` to
+  credential-stealing malware (`GHSA-69fq-xp46-6x23` / `CVE-2026-33634`, critical; affected range
+  `< 0.35.0`). Upstream republished the legitimate tags **`v`-prefixed** and left only the single
+  non-prefixed `0.35.0` alive to avoid breaking workflows, so `0.28.0` was deleted. `backend /
+  docker-build` carried the same ref and would have failed identically the moment its `needs:` chain
+  unblocked — it was merely skipped, never green.
+  - Both occurrences are now **SHA-pinned**: `aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0`.
+    A mutable `@v0.36.0` also resolves, but the advisory explicitly lists SHA pins to commits *before*
+    2025-04-09 as affected, and this is the one action in the repo with a demonstrated tag-hijacking
+    history — the pin is the remediation, not hygiene. `ed142fd…` is the commit `v0.36.0`
+    dereferences to (the annotated-tag object `a9c7b0f…` is **not** usable; Actions requires a commit).
+  - All four inputs in use (`image-ref`, `severity`, `exit-code`, `ignore-unfixed`) are still declared
+    in `action.yaml` at v0.36.0, so the bump is drop-in. v0.36.0 pins the Trivy binary at `v0.70.0`,
+    which the local verification below used.
+
+- **`backend / sast` failed on `Dependency audit`** — `pip-audit` found 11 advisories across 4
+  packages: `click` 8.3.2 (`PYSEC-2026-2132`), `idna` 3.12 (`PYSEC-2026-215`), `msgpack` 1.1.2
+  (`PYSEC-2026-3625`), and `starlette` 1.0.0 (`PYSEC-2026-161`, `-2280`, `-2281`, `-248`, `-249`).
+  Only `msgpack` is a direct dependency; the other three arrive through `fastapi` and `uvicorn`.
+  `backend/uv.lock` was 2.5 months stale, so `uv sync` was installing the vulnerable set on every run.
+  - **`backend/uv.lock` refreshed** (`uv lock --upgrade`). The four packages move to `click` 8.5.0,
+    `idna` 3.19, `msgpack` 1.2.2, `starlette` 1.6.0 (with `fastapi` 0.136.0 → 0.141.1, which is what
+    permits starlette 1.6). `pip-audit` now reports **no known vulnerabilities**.
+  - No `pyproject.toml` floors were raised. Three of the four are transitive, so a floor would mean
+    declaring them as direct dependencies purely to pin them; the lockfile is the enforcement point
+    and CI installs from it.
+
+- **`backend/Dockerfile`: the image is now built from the lockfile.** It copied `pyproject.toml`
+  alone and ran `uv sync --no-dev --no-install-project 2>/dev/null || echo "No dependencies to
+  install yet"`. Two consequences, both material now that `docker-build` actually scans the image:
+  the image resolved its own dependency set independently of the one `pip-audit` gates, so Trivy and
+  `pip-audit` could disagree; and the discarded stderr plus `|| echo` turned a failed dependency
+  install into a **green build shipping an empty environment**. Now `COPY pyproject.toml uv.lock ./`
+  + `uv sync --frozen --no-dev --no-install-project`.
+
+- **`backend/Dockerfile`: setuptools upgraded to clear two HIGH findings.** With the trivy step
+  reachable for the first time, the backend image scanned **2 HIGH**: `jaraco.context` 5.3.0
+  (`CVE-2026-23949`, fixed 6.1.0) and `wheel` 0.45.1 (`CVE-2026-24049`, fixed 0.46.2). Neither is a
+  project dependency — both are vendored under `setuptools/_vendor/` in the `python:3.11-slim` base,
+  which ships setuptools 79.0.1. Replacing setuptools is the only remediation: 84.0.0 vendors
+  `jaraco.context` 6.1.0 and `wheel` 0.46.3. These are remediable, so they were fixed rather than
+  suppressed; `.trivyignore` is unchanged and its two entries were confirmed still load-bearing (the
+  image scans clean with it and reports exactly those two IDs without it).
+
+**Verified locally, all against the exact CI commands** — backend: `ruff check` / `ruff format
+--check` clean, `pytest` 7 passed at 100% coverage, `pip-audit` clean, `uv build` OK, Semgrep 0
+findings (145 rules), image builds and the container reports `healthy` with `/health` → 200.
+Frontend: `pnpm install --frozen-lockfile`, `lint`, `test:coverage` (100%, JUnit written), `build`,
+`pnpm audit --audit-level=high` all clean, Semgrep 0 findings (94 rules). Both images scanned with
+Trivy **v0.70.0** — the version the pinned action ships — using CI's exact flags
+(`--severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed`, default scanners, so secret scanning
+included): **both exit 0**.
+
+**Semver reasoning:** Patch, folded into the existing unreleased v0.2.2 rather than opening a new
+heading (`backend/pyproject.toml` is still 0.2.1, so v0.2.2 is unreleased and only one unreleased
+version may exist at a time). Bug fixes to the pipeline plus a dependency refresh; no application
+code, host port, API or data contract changed, and no test changed.
+
 ### Base-image security patch for the alpine runtime stage (2026-08-26)
 
 - **`RUN apk upgrade --no-cache` added to `frontend/Dockerfile`.** The `nginx:alpine` base currently ships
